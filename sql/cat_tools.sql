@@ -122,7 +122,7 @@ CREATE OR REPLACE VIEW _cat_tools.column AS
         -- domain
         WHEN 'd' THEN pg_catalog.format_type(typbasetype, typtypmod)
         -- enum
-        WHEN 'e' THEN 'text' 
+        WHEN 'e' THEN 'text'
         ELSE pg_catalog.format_type(typoid, atttypmod)
       END AS base_type
     , pk.conkey AS pk_columns
