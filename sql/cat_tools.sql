@@ -345,7 +345,9 @@ SELECT __cat_tools.create_function(
   , OUT defer text
   , OUT row_statement text
   , OUT when_clause text
-  , OUT function_arguments text
+  , OUT function_arguments text[]
+  , OUT function_name text
+  , OUT table_name text
 $$
   , $$record LANGUAGE plpgsql$$
   , $body$
@@ -382,6 +384,10 @@ BEGIN
   v_on_clause := ' ON ' || r_trigger.tgrelid::regclass || ' ';
   v_array := regexp_split_to_array( v_work, v_on_clause );
   events := string_to_array( v_array[1], ' OR ' );
+
+ -- Get the name of the table that fires the trigger
+  table_name := r_trigger.tgrelid::regclass;
+
   -- Get everything after ON table_name
   v_work := v_array[2];
   RAISE DEBUG 'v_work "%"', v_work;
@@ -396,10 +402,14 @@ BEGIN
   END IF;
   RAISE DEBUG 'v_work "%"', v_work;
 
+  -- Get function name
+  function_name := r_trigger.tgfoid::regproc;
+
   -- Get function arguments
   v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::regproc || E'\\(';
   v_array := regexp_split_to_array( v_work, v_execute_clause );
-  function_arguments := rtrim( v_array[2], ')' ); -- Yank trailing )
+  function_arguments :=  array_remove(regexp_split_to_array(rtrim( v_array[2], ')' ), '\W+'), '');
+
   -- Get everything prior to EXECUTE PROCEDURE ...
   v_work := v_array[1];
   RAISE DEBUG 'v_work "%"', v_work;
