@@ -21,6 +21,9 @@ BEGIN
   EXECUTE sql;
 END
 $body$;
+
+@generated@
+
 CREATE FUNCTION __cat_tools.create_function(
   function_name text
   , args text
@@ -52,6 +55,8 @@ GRANT EXECUTE ON FUNCTION %s(
 $template$
   ;
 
+@generated@
+
 BEGIN
   PERFORM __cat_tools.exec( format(
       create_template
@@ -80,6 +85,8 @@ BEGIN
 END
 $body$;
 
+@generated@
+
 CREATE SCHEMA cat_tools;
 GRANT USAGE ON SCHEMA cat_tools TO cat_tools__usage;
 CREATE SCHEMA _cat_tools;
@@ -103,6 +110,8 @@ CREATE OR REPLACE VIEW cat_tools.pg_class_v AS
       AND relkind IN( 'r', 'v', 'f' )
 ;
 GRANT SELECT ON cat_tools.pg_class_v TO cat_tools__usage;
+
+@generated@
 
 CREATE OR REPLACE VIEW _cat_tools.pg_attribute_v AS
   SELECT a.*
@@ -140,6 +149,8 @@ CREATE OR REPLACE VIEW _cat_tools.column AS
 ;
 REVOKE ALL ON _cat_tools.column FROM public;
 
+@generated@
+
 CREATE OR REPLACE VIEW cat_tools.column AS
   SELECT *
     FROM _cat_tools.column
@@ -172,6 +183,8 @@ SELECT __cat_tools.create_function(
 $$
 );
 
+@generated@
+
 -- Borrowed from newsysviews: http://pgfoundry.org/projects/newsysviews/
 SELECT __cat_tools.create_function(
   '_cat_tools._pg_sv_table_accessible'
@@ -190,6 +203,8 @@ SELECT __cat_tools.create_function(
     END;
 $$
 );
+
+@generated@
 
 -- Borrowed from newsysviews: http://pgfoundry.org/projects/newsysviews/
 CREATE OR REPLACE VIEW cat_tools.pg_all_foreign_keys
@@ -210,7 +225,7 @@ AS
                                WHEN 'u' THEN 'NONE'
                                else null
          END AS match_type,
-         CASE k1.confdeltype WHEN 'a' THEN 'NO ACTION'
+         CASE k1.confdeltype WHEN 'a' THEN 'NO ACTION'  -- @generated@
                              WHEN 'c' THEN 'CASCADE'
                              WHEN 'd' THEN 'SET DEFAULT'
                              WHEN 'n' THEN 'SET NULL'
@@ -224,7 +239,7 @@ AS
                              WHEN 'r' THEN 'RESTRICT'
                              ELSE NULL
          END AS on_update,
-         k1.condeferrable AS is_deferrable,
+         k1.condeferrable AS is_deferrable,             -- @generated@
          k1.condeferred   AS is_deferred
     FROM pg_catalog.pg_constraint k1
     JOIN pg_catalog.pg_namespace n1 ON (n1.oid = k1.connamespace)
@@ -232,7 +247,7 @@ AS
     JOIN pg_catalog.pg_class c2     ON (c2.oid = k1.confrelid)
     JOIN pg_catalog.pg_namespace n2 ON (n2.oid = c2.relnamespace)
     JOIN pg_catalog.pg_depend d     ON (
-                 d.classid = 'pg_constraint'::regclass
+                 d.classid = 'pg_constraint'::regclass  -- @generated@
              AND d.objid = k1.oid
              AND d.objsubid = 0
              AND d.deptype = 'n'
@@ -241,14 +256,14 @@ AS
          )
     JOIN pg_catalog.pg_class ci ON (ci.oid = d.refobjid AND ci.relkind = 'i')
     LEFT JOIN pg_depend d2      ON (
-                 d2.classid = 'pg_class'::regclass
+                 d2.classid = 'pg_class'::regclass      -- @generated@
              AND d2.objid = ci.oid
              AND d2.objsubid = 0
              AND d2.deptype = 'i'
              AND d2.refclassid = 'pg_constraint'::regclass
              AND d2.refobjsubid = 0
          )
-    LEFT JOIN pg_catalog.pg_constraint k2 ON (
+    LEFT JOIN pg_catalog.pg_constraint k2 ON (          -- @generated@
                  k2.oid = d2.refobjid
              AND k2.contype IN ('p', 'u')
          )
@@ -258,6 +273,8 @@ AS
      AND _cat_tools._pg_sv_table_accessible(n1.oid, c1.oid)
 ;
 GRANT SELECT ON cat_tools.pg_all_foreign_keys TO cat_tools__usage;
+
+@generated@
 
 SELECT __cat_tools.create_function(
   'cat_tools.currval'
@@ -287,6 +304,8 @@ $body$
   , 'cat_tools__usage'
 );
 
+@generated@
+
 SELECT __cat_tools.create_function(
   'cat_tools.enum_range'
   , 'enum regtype'
@@ -301,6 +320,8 @@ END
 $body$
   , 'cat_tools__usage'
 );
+
+@generated@
 
 SELECT __cat_tools.create_function(
   'cat_tools.enum_range_srf'
@@ -322,6 +343,8 @@ $body$
   , 'cat_tools__usage'
 );
 
+@generated@
+
 SELECT __cat_tools.create_function(
   'cat_tools.name__check'
   , 'name_to_check text'
@@ -335,6 +358,8 @@ END
 $body$
   , 'cat_tools__usage'
 );
+
+@generated@
 
 SELECT __cat_tools.create_function(
   'cat_tools.trigger__parse'
@@ -433,6 +458,8 @@ $body$
   , 'cat_tools__usage'
 );
 
+@generated@
+
 SELECT __cat_tools.create_function(
   'cat_tools.trigger__get_oid__loose'
   , $$
@@ -449,6 +476,8 @@ $$
 $body$
   , 'cat_tools__usage'
 );
+
+@generated@
 
 SELECT __cat_tools.create_function(
   'cat_tools.trigger__get_oid'
@@ -473,6 +502,8 @@ END
 $body$
   , 'cat_tools__usage'
 );
+
+@generated@
 
 /*
  * Drop "temporary" objects

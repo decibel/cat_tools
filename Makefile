@@ -13,9 +13,8 @@ $B:
 installcheck: $B/cat_tools.sql
 EXTRA_CLEAN += $B/cat_tools.sql
 $B/cat_tools.sql: sql/cat_tools.in.sql Makefile
+	(echo @generated@ && cat $< && echo @generated@) | sed -e 's#@generated@#-- GENERATED FILE! DO NOT EDIT! See $<#' > $@
 ifeq ($(LT95),yes)
-	cat $< | sed -e 's/, COLUMN/-- Requires 9.3: &/' > $@
-else
-	cp $< $@
+	sed -i '' -e 's/, COLUMN/-- Requires 9.3: &/' $@
 endif
 
