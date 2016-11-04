@@ -317,7 +317,7 @@ SELECT __cat_tools.create_function(
   , 'rel regclass'
   , $$cat_tools.pg_class_v LANGUAGE sql STABLE$$
   , $body$
-SELECT * FROM cat_tools.pg_class_v WHERE reloid = rel
+SELECT * FROM cat_tools.pg_class_v WHERE reloid = $1
 $body$
   , 'cat_tools__usage'
 );
@@ -443,8 +443,8 @@ $$
   , $body$
   SELECT oid
     FROM pg_trigger
-    WHERE tgrelid = trigger_table
-      AND tgname = trigger_name
+    WHERE tgrelid = $1 --trigger_table
+      AND tgname = $2 --trigger_name
   ;
 $body$
   , 'cat_tools__usage'
