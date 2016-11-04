@@ -1,11 +1,19 @@
+-- IF NOT EXISTS will emit NOTICEs, which is annoying
+SET client_min_messages = WARNING;
+
+-- Add any test dependency statements here
 -- Note: pgTap is loaded by setup.sql
+--CREATE EXTENSION IF NOT EXISTS ...;
+/*
+ * Now load our extension. We don't use IF NOT EXISTs here because we want an
+ * error if the extension is already loaded (because we want to ensure we're
+ * getting the very latest version).
+ */
+CREATE EXTENSION cat_tools;
 /*
 CREATE EXTENSION cat_tools VERSION '0.1.0';
 ALTER EXTENSION cat_tools UPDATE;
 */
-CREATE EXTENSION cat_tools;
-
--- Add any test dependency statements here
 
 -- Used by several unit tests
 \set no_use_role cat_tools_testing__no_use_role
