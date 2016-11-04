@@ -474,6 +474,9 @@ $body$
   , 'cat_tools__usage'
 );
 
+/*
+ * Drop "temporary" objects
+ */
 DROP FUNCTION __cat_tools.exec(
   sql text
 );
