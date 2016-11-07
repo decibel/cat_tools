@@ -362,6 +362,99 @@ $body$
 @generated@
 
 SELECT __cat_tools.create_function(
+  'cat_tools.function__arg_types'
+  , $$arguments text$$
+  , $$regtype[] LANGUAGE plpgsql$$
+  , $body$
+DECLARE
+  input_arg_types regtype[];
+
+  c_template CONSTANT text := $fmt$CREATE FUNCTION pg_temp.cat_tools__function__arg_types__temp_function(
+    %s
+  ) RETURNS %s LANGUAGE plpgsql AS 'BEGIN NULL; END'
+  $fmt$;
+
+  temp_proc regprocedure;
+  sql text;
+BEGIN
+  sql := format(
+    c_template
+    , arguments
+    , 'void'
+  );
+  --RAISE DEBUG 'Executing SQL %', sql;
+  DECLARE
+    v_type regtype;
+  BEGIN
+    EXECUTE sql;
+  EXCEPTION WHEN invalid_function_definition THEN
+    v_type := (regexp_matches( SQLERRM, 'function result type must be ([^ ]+) because of' ))[1];
+    sql := format(
+      c_template
+      , arguments
+      , v_type
+    );
+    EXECUTE sql;
+  END;
+
+  /*
+   * Get new OID. *This must be done dynamically!* Otherwise we get stuck
+   * with a CONST oid after first compilation. The regproc cast ensures there's
+   * only one function with this name. The cast to regprocedure is for the sake
+   * of the DROP down below.
+   */
+  EXECUTE $$SELECT 'pg_temp.cat_tools__function__arg_types__temp_function'::regproc::regprocedure$$ INTO temp_proc;
+  SELECT INTO STRICT input_arg_types
+      -- This is here to re-cast the array as 1-based instead of 0 based (better solutions welcome!)
+      string_to_array(proargtypes::text,' ')::regtype[]
+    FROM pg_proc
+    WHERE oid = temp_proc
+  ;
+  -- NOTE: DROP may not accept all the argument options that CREATE does, so use temp_proc
+  EXECUTE format(
+    $fmt$DROP FUNCTION %s$fmt$
+    , temp_proc
+  );
+
+  RETURN input_arg_types;
+END
+$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.function__arg_types_text'
+  , $$arguments text$$
+  , $$text LANGUAGE sql$$
+  , $body$
+SELECT array_to_string(cat_tools.function__arg_types($1), ', ')
+$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.regprocedure'
+  , $$
+  function_name text
+  , arguments text$$
+  , $$regprocedure LANGUAGE sql$$
+  , $body$
+SELECT format(
+  '%s(%s)'
+  , $1
+  , cat_tools.function__arg_types_text($2)
+)::regprocedure
+$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
   'cat_tools.trigger__parse'
   , $$
   trigger_oid oid
