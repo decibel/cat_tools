@@ -18,10 +18,14 @@ meta.mk: META.json Makefile $(PGXNTOOL_DIR)/base.mk $(PGXNTOOL_DIR)/meta.mk.sh
 -include meta.mk
 
 DATA         = $(EXTENSION_VERSION_FILES) $(wildcard sql/*--*--*.sql)
-DOCS         = $(wildcard doc/*.asc)
-ifeq ($(strip $(DOCS)),)
-DOCS =# Set to NUL so PGXS doesn't puke
-endif
+DOC_DIRS	+= doc
+# NOTE: if this is empty it gets forcibly defined to NUL before including PGXS
+DOCS		+= $(foreach dir,$(DOC_DIRS),$(dir)/*)
+
+# Find all asciidoc targets
+ASCIIDOC ?= $(shell which asciidoctor 2>/dev/null || which asciidoc 2>/dev/null)
+ASCIIDOC_EXTS	+= adoc asciidoc
+ASCIIDOC_FILES	+= $(foreach dir,$(DOC_DIRS),$(foreach ext,$(ASCIIDOC_EXTS),$(wildcard $(dir)/*.$(ext))))
 
 PG_CONFIG   ?= pg_config
 TESTDIR		?= test
@@ -92,12 +96,46 @@ $(TESTDIR)/sql:
 	@mkdir -p $@
 $(TESTDIR)/expected/:
 	@mkdir -p $@
-$(TEST_RESULT_FILES): $(TESTDIR)/expected/
+$(TEST_RESULT_FILES): | $(TESTDIR)/expected/
 	@touch $@
 $(TESTDIR)/output/:
 	@mkdir -p $@
-$(TEST_OUT_FILES): $(TESTDIR)/output/ $(TESTDIR)/expected/ $(TESTDIR)/sql/
+$(TEST_OUT_FILES): | $(TESTDIR)/output/ $(TESTDIR)/expected/ $(TESTDIR)/sql/
 	@touch $@
+
+
+#
+# DOC SUPPORT
+#
+ASCIIDOC_HTML += $(filter %.html,$(foreach ext,$(ASCIIDOC_EXTS),$(ASCIIDOC_FILES:.$(ext)=.html)))
+DOCS_HTML += $(ASCIIDOC_HTML)
+
+# General ASCIIDOC template. This will be used to create rules for all ASCIIDOC_EXTS
+define ASCIIDOC_template
+%.html: %.$(1)
+ifeq (,$(strip $(ASCIIDOC)))
+	$$(warning Could not find "asciidoc" or "asciidoctor". Add one of them to your PATH,)
+	$$(warning or set ASCIIDOC to the correct location.)
+	$$(error Could not build %$$@)
+endif # ifeq ASCIIDOC
+	$$(ASCIIDOC) $$(ASCIIDOC_FLAGS) $$<
+endef # define ASCIIDOC_template
+
+# Create the actual rules
+$(foreach ext,$(ASCIIDOC_EXTS),$(eval $(call ASCIIDOC_template,$(ext))))
+
+# Create the html target regardless of whether we have asciidoc, and make it a dependency of dist
+html: $(ASCIIDOC_HTML)
+dist: html
+# But don't add it as an install or test dependency unless we do have asciidoc
+ifneq (,$(strip $(ASCIIDOC)))
+install: html
+installcheck: html
+endif # ASCIIDOC
+
+.PHONY: docclean
+docclean:
+	$(RM) $(DOCS_HTML)
 
 
 #
@@ -167,9 +205,14 @@ include $(PGXS)
 # the META handling stuff is it's own makefile.
 #
 .PHONY: pgtap
+installcheck: pgtap
 pgtap: $(DESTDIR)$(datadir)/extension/pgtap.control
 
 $(DESTDIR)$(datadir)/extension/pgtap.control:
 	pgxn install pgtap
 
 endif # fndef PGXNTOOL_NO_PGXS_INCLUDE
+
+ifeq ($(strip $(DOCS)),)
+DOCS =# Set to NUL so PGXS doesn't puke
+endif
