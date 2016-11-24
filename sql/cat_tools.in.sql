@@ -98,6 +98,106 @@ CREATE OR REPLACE VIEW _cat_tools.pg_class_v AS
 ;
 REVOKE ALL ON _cat_tools.pg_class_v FROM public;
 
+@generated@
+
+CREATE TYPE cat_tools.relation_kind AS ENUM(
+  'table'
+  , 'index'
+  , 'sequence'
+  , 'toast table'
+  , 'view'
+  , 'materialized view'
+  , 'composite type'
+  , 'foreign table'
+);
+
+CREATE TYPE cat_tools.relation_relkind AS ENUM(
+  'r'
+  , 'i'
+  , 'S'
+  , 't'
+  , 'v'
+  , 'c'
+  , 'f'
+  , 'm'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.relation__kind'
+  , 'relkind cat_tools.relation_relkind'
+  , 'cat_tools.relation_kind LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT CASE relkind
+  WHEN 'r' THEN 'table'
+  WHEN 'i' THEN 'index'
+  WHEN 'S' THEN 'sequence'
+  WHEN 't' THEN 'toast table'
+  WHEN 'v' THEN 'view'
+  WHEN 'c' THEN 'materialized view'
+  WHEN 'f' THEN 'composite type'
+  WHEN 'm' THEN 'foreign table'
+END::cat_tools.relation_kind
+$body$
+  , 'cat_tools__usage'
+);
+
+SELECT __cat_tools.create_function(
+  'cat_tools.relation__relkind'
+  , 'kind cat_tools.relation_kind'
+  , 'cat_tools.relation_relkind LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT CASE kind
+  WHEN 'table' THEN 'r'
+  WHEN 'index' THEN 'i'
+  WHEN 'sequence' THEN 'S'
+  WHEN 'toast table' THEN 't'
+  WHEN 'view' THEN 'v'
+  WHEN 'materialized view' THEN 'c'
+  WHEN 'composite type' THEN 'f'
+  WHEN 'foreign table' THEN 'm'
+END::cat_tools.relation_relkind
+$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.relation__relkind'
+  , 'kind text'
+  , 'cat_tools.relation_relkind LANGUAGE sql STRICT IMMUTABLE'
+  , $body$SELECT cat_tools.relation__relkind(kind::cat_tools.relation_kind)$body$
+  , 'cat_tools__usage'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.relation__kind'
+  , 'relkind text'
+  , 'cat_tools.relation_kind LANGUAGE sql STRICT IMMUTABLE'
+  , $body$SELECT cat_tools.relation__kind(relkind::cat_tools.relation_relkind)$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.enum_range'
+  , 'enum regtype'
+  , $$text[] LANGUAGE plpgsql STABLE$$
+  , $body$
+DECLARE
+  ret text[];
+BEGIN
+  EXECUTE format('SELECT pg_catalog.enum_range( NULL::%s )', enum) INTO ret;
+  RETURN ret;
+END
+$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
 CREATE OR REPLACE VIEW cat_tools.pg_class_v AS
   SELECT *
     FROM _cat_tools.pg_class_v
