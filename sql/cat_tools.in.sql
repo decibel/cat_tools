@@ -1,3 +1,5 @@
+SET LOCAL client_min_messages = WARNING;
+
 DO $$
 BEGIN
   CREATE ROLE cat_tools__usage NOLOGIN;
@@ -184,7 +186,7 @@ CREATE TYPE cat_tools.object_type AS ENUM(
 SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
   , 'object_type cat_tools.object_type'
-  , 'regclass LANGUAGE sql STRICT IMMUTABLE'
+  , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
   , $body$
 SELECT CASE
   WHEN object_type = ANY( array[
@@ -226,15 +228,70 @@ SELECT CASE
     WHEN 'access method' THEN 'pg_am'
     ELSE 'pg_' || object_type::text
     END
-  END::regclass
+  END::pg_catalog.regclass
 $body$
   , 'cat_tools__usage'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
   , 'object_type text'
-  , 'regclass LANGUAGE sql STRICT IMMUTABLE'
+  , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.object__catalog(object_type::cat_tools.object_type)$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+CREATE TABLE _cat_tools.catalog_metadata(
+  object_catalog    pg_catalog.regclass
+    CONSTRAINT catalog_metadata__pk_object_catalog PRIMARY KEY
+  , namespace_field name
+  , reg_type        pg_catalog.regtype
+  , simple_reg_type pg_catalog.regtype
+);
+-- Table is populated later, after enum_range_srf is created
+SELECT __cat_tools.create_function(
+  '_cat_tools.catalog_metadata__get'
+  , 'object_catalog _cat_tools.catalog_metadata.object_catalog%TYPE'
+  , '_cat_tools.catalog_metadata LANGUAGE plpgsql IMMUTABLE' -- Technically should be STABLE
+  , $body$
+DECLARE
+  o _cat_tools.catalog_metadata;
+BEGIN
+  SELECT INTO STRICT o
+      *
+    FROM _cat_tools.catalog_metadata m
+    WHERE m.object_catalog = catalog_metadata__get.object_catalog
+  ;
+  RETURN o;
+END
+$body$
+  , 'cat_tools__usage'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.object__reg_type'
+  , 'object_catalog pg_catalog.regclass'
+  , 'pg_catalog.regtype LANGUAGE sql SECURITY DEFINER STRICT IMMUTABLE'
+  , $body$
+SELECT (_cat_tools.catalog_metadata__get(object_catalog)).reg_type
+$body$
+  , 'cat_tools__usage'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__reg_type'
+  , 'object_type cat_tools.object_type'
+  , 'pg_catalog.regtype LANGUAGE sql STRICT IMMUTABLE'
+  , $body$SELECT cat_tools.object__reg_type(cat_tools.object__catalog(object_type))$body$
+  , 'cat_tools__usage'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__reg_type'
+  , 'object_type text'
+  , 'pg_catalog.regtype LANGUAGE sql STRICT IMMUTABLE'
+  , $body$SELECT cat_tools.object__reg_type(object_type::cat_tools.object_type)$body$
   , 'cat_tools__usage'
 );
 
@@ -792,6 +849,36 @@ END
 $body$
   , 'cat_tools__usage'
 );
+
+@generated@
+
+INSERT INTO _cat_tools.catalog_metadata(object_catalog, reg_type)
+SELECT object__catalog
+    , CASE object__catalog
+      WHEN 'pg_catalog.pg_class'::regclass THEN 'pg_catalog.regclass'
+      WHEN 'pg_catalog.pg_ts_config'::regclass THEN 'pg_catalog.regconfig'
+      WHEN 'pg_catalog.pg_ts_dict'::regclass THEN 'pg_catalog.regdictionary'
+      WHEN 'pg_catalog.pg_namespace'::regclass THEN 'pg_catalog.regnamespace'
+      WHEN 'pg_catalog.pg_operator'::regclass THEN 'pg_catalog.regoperator'
+      WHEN 'pg_catalog.pg_proc'::regclass THEN 'pg_catalog.regprocedure'
+      WHEN 'pg_catalog.pg_authid'::regclass THEN 'pg_catalog.regrole'
+      WHEN 'pg_catalog.pg_type'::regclass THEN 'pg_catalog.regtype'
+    END::pg_catalog.regtype
+  FROM (
+    SELECT DISTINCT cat_tools.object__catalog(object_type)
+      FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
+    ) d
+;
+UPDATE _cat_tools.catalog_metadata
+  SET simple_reg_type = 'pg_catalog.regproc'
+  WHERE object_catalog = 'pg_catalog.pg_proc'::regclass
+;
+UPDATE _cat_tools.catalog_metadata
+  SET simple_reg_type = 'pg_catalog.regoper'
+  WHERE object_catalog = 'pg_catalog.pg_operator'::regclass
+;
+-- Cluster to get rid of dead rows
+CLUSTER _cat_tools.catalog_metadata USING catalog_metadata__pk_object_catalog;
 
 @generated@
 
