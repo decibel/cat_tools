@@ -100,6 +100,13 @@ REVOKE ALL ON _cat_tools.pg_class_v FROM public;
 
 @generated@
 
+CREATE TYPE cat_tools.constraint_type AS ENUM(
+  'domain constraint', 'table constraint'
+);
+CREATE TYPE cat_tools.procedure_type AS ENUM(
+  'aggregate', 'function'
+);
+
 CREATE TYPE cat_tools.relation_kind AS ENUM(
   'table'
   , 'index'
@@ -120,6 +127,115 @@ CREATE TYPE cat_tools.relation_relkind AS ENUM(
   , 'c'
   , 'f'
   , 'm'
+);
+
+@generated@
+
+CREATE TYPE cat_tools.object_type AS ENUM(
+  -- pg_class
+  'table'
+  , 'index'
+  , 'sequence'
+  , 'toast table'
+  , 'view'
+  , 'materialized view'
+  , 'composite type'
+  , 'foreign table'
+  -- pg_constraint
+  , 'domain constraint', 'table constraint'
+  -- pg_proc
+  , 'aggregate', 'function'
+  -- This is taken from getObjectTypeDescription() in objectaddress.c in the Postgres source code
+  , 'type'
+  , 'cast'
+  , 'collation'
+  , 'conversion'
+  , 'default value' -- pg_attrdef
+  , 'language'
+  , 'large object' -- pg_largeobject
+  , 'operator'
+  , 'operator class' -- pg_opclass
+  , 'operator family' -- pg_opfamily
+  , 'operator of access method' -- pg_amop
+  , 'function of access method' -- pg_amproc
+  , 'rule' -- pg_rewrite
+  , 'trigger'
+  , 'schema' -- pg_namespace
+  , 'text search parser' -- pg_ts_parser
+  , 'text search dictionary' -- pg_ts_dict
+  , 'text search template' -- pg_ts_template
+  , 'text search configuration' -- pg_ts_config
+  , 'role' -- pg_authid
+  , 'database'
+  , 'tablespace'
+  , 'foreign-data wrapper' -- pg_foreign_data_wrapper
+  , 'server' -- pg_foreign_server
+  , 'user mapping' -- pg_user_mapping
+  , 'default acl' -- pg_default_acl
+  , 'extension'
+  , 'event trigger' -- pg_event_trigger
+  , 'policy'
+  , 'transform'
+  , 'access method' -- pg_am
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.object__catalog'
+  , 'object_type cat_tools.object_type'
+  , 'regclass LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT CASE
+  WHEN object_type = ANY( array[
+  'table'
+  , 'index'
+  , 'sequence'
+  , 'toast table'
+  , 'view'
+  , 'materialized view'
+  , 'composite type'
+  , 'foreign table'
+    ]::cat_tools.object_type[] )
+  THEN 'pg_class'
+  WHEN object_type = ANY( '{domain constraint,table constraint}'::cat_tools.object_type[] )
+    THEN 'pg_constraint'
+  WHEN object_type = ANY( '{aggregate,function}'::cat_tools.object_type[] )
+    THEN 'pg_proc'
+  ELSE CASE object_type
+    -- Unusual cases
+    -- s/, \(.\{-}\) -- \(.*\)/  WHEN \1 THEN '\2'/
+    WHEN 'default value' THEN 'pg_attrdef'
+    WHEN 'large object' THEN 'pg_largeobject'
+    WHEN 'operator class' THEN 'pg_opclass'
+    WHEN 'operator family' THEN 'pg_opfamily'
+    WHEN 'operator of access method' THEN 'pg_amop'
+    WHEN 'function of access method' THEN 'pg_amproc'
+    WHEN 'rule' THEN 'pg_rewrite'
+    WHEN 'schema' THEN 'pg_namespace'
+    WHEN 'text search parser' THEN 'pg_ts_parser'
+    WHEN 'text search dictionary' THEN 'pg_ts_dict'
+    WHEN 'text search template' THEN 'pg_ts_template'
+    WHEN 'text search configuration' THEN 'pg_ts_config'
+    WHEN 'role' THEN 'pg_authid'
+    WHEN 'foreign-data wrapper' THEN 'pg_foreign_data_wrapper'
+    WHEN 'server' THEN 'pg_foreign_server'
+    WHEN 'user mapping' THEN 'pg_user_mapping'
+    WHEN 'default acl' THEN 'pg_default_acl'
+    WHEN 'event trigger' THEN 'pg_event_trigger'
+    WHEN 'access method' THEN 'pg_am'
+    ELSE 'pg_' || object_type::text
+    END
+  END::regclass
+$body$
+  , 'cat_tools__usage'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__catalog'
+  , 'object_type text'
+  , 'regclass LANGUAGE sql STRICT IMMUTABLE'
+  , $body$SELECT cat_tools.object__catalog(object_type::cat_tools.object_type)$body$
+  , 'cat_tools__usage'
 );
 
 @generated@
