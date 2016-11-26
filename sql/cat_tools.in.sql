@@ -852,7 +852,7 @@ $body$
 
 @generated@
 
-INSERT INTO _cat_tools.catalog_metadata(object_catalog, reg_type)
+INSERT INTO _cat_tools.catalog_metadata(object_catalog, reg_type, namespace_field)
 SELECT object__catalog
     , CASE object__catalog
       WHEN 'pg_catalog.pg_class'::regclass THEN 'pg_catalog.regclass'
@@ -864,10 +864,15 @@ SELECT object__catalog
       WHEN 'pg_catalog.pg_authid'::regclass THEN 'pg_catalog.regrole'
       WHEN 'pg_catalog.pg_type'::regclass THEN 'pg_catalog.regtype'
     END::pg_catalog.regtype
+    , n.attname
   FROM (
     SELECT DISTINCT cat_tools.object__catalog(object_type)
       FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
     ) d
+    LEFT JOIN cat_tools.column n
+      ON n.attrelid = object__catalog
+      AND n.attname ~ 'namespace$'
+      AND atttypid = 'oid'::pg_catalog.regtype
 ;
 UPDATE _cat_tools.catalog_metadata
   SET simple_reg_type = 'pg_catalog.regproc'
