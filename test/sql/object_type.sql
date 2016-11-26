@@ -17,10 +17,10 @@ SELECT '{}'::text[]
 $$;
 
 CREATE TEMP VIEW obj_type AS
-  SELECT object_type::text, true AS is_real
+  SELECT object_type::text COLLATE "C", true AS is_real
     FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
   UNION ALL -- INTENTIONALLY UNION ALL! We want dupes if something gets hosed
-  SELECT u, false
+  SELECT u COLLATE "C", false
     FROM unnest(pg_temp.extra_types()) u
   ORDER BY object_type
 ;
@@ -77,5 +77,7 @@ SELECT lives_ok(
 ;
 
 \i test/pgxntool/finish.sql
+
+select name,setting from pg_settings where name ~ '^lc_';
 
 -- vi: expandtab ts=2 sw=2
