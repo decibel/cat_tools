@@ -7,12 +7,12 @@
 SET LOCAL ROLE :use_role;
 CREATE TEMP VIEW kinds AS
   SELECT
-      (cat_tools.enum_range('cat_tools.relation_kind'))[gs] AS kind
+      (cat_tools.enum_range('cat_tools.relation_type'))[gs] AS kind
       , (cat_tools.enum_range('cat_tools.relation_relkind'))[gs] AS relkind
     FROM generate_series(
       1
       , greatest(
-        array_upper(cat_tools.enum_range('cat_tools.relation_kind'), 1)
+        array_upper(cat_tools.enum_range('cat_tools.relation_type'), 1)
         , array_upper(cat_tools.enum_range('cat_tools.relation_relkind'), 1)
       )
     ) gs
@@ -33,7 +33,7 @@ SELECT is(
 
 SELECT is(
   cat_tools.relation__kind('r')
-  , 'table'::cat_tools.relation_kind
+  , 'table'::cat_tools.relation_type
   , 'Simple sanity check of relation__kind()'
 );
 SELECT is(
@@ -72,11 +72,11 @@ SELECT is(cat_tools.relation__relkind(kind)::text, relkind, format('SELECT cat_t
   FROM kinds
 ;
 
-SELECT is(cat_tools.relation__kind(relkind)::text, kind, format('SELECT cat_tools.relation_kind(%L)', relkind))
+SELECT is(cat_tools.relation__kind(relkind)::text, kind, format('SELECT cat_tools.relation_type(%L)', relkind))
   FROM kinds
 ;
 
-SELECT is(cat_tools.relation__kind(relkind::"char")::text, kind, format('SELECT cat_tools.relation_kind(%L::"char")', relkind))
+SELECT is(cat_tools.relation__kind(relkind::"char")::text, kind, format('SELECT cat_tools.relation_type(%L::"char")', relkind))
   FROM kinds
 ;
 

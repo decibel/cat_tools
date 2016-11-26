@@ -109,7 +109,7 @@ CREATE TYPE cat_tools.procedure_type AS ENUM(
   'aggregate', 'function'
 );
 
-CREATE TYPE cat_tools.relation_kind AS ENUM(
+CREATE TYPE cat_tools.relation_type AS ENUM(
   'table'
   , 'index'
   , 'sequence'
@@ -300,7 +300,7 @@ SELECT __cat_tools.create_function(
 SELECT __cat_tools.create_function(
   'cat_tools.relation__kind'
   , 'relkind cat_tools.relation_relkind'
-  , 'cat_tools.relation_kind LANGUAGE sql STRICT IMMUTABLE'
+  , 'cat_tools.relation_type LANGUAGE sql STRICT IMMUTABLE'
   , $body$
 SELECT CASE relkind
   WHEN 'r' THEN 'table'
@@ -311,14 +311,14 @@ SELECT CASE relkind
   WHEN 'c' THEN 'materialized view'
   WHEN 'f' THEN 'composite type'
   WHEN 'm' THEN 'foreign table'
-END::cat_tools.relation_kind
+END::cat_tools.relation_type
 $body$
   , 'cat_tools__usage'
 );
 
 SELECT __cat_tools.create_function(
   'cat_tools.relation__relkind'
-  , 'kind cat_tools.relation_kind'
+  , 'kind cat_tools.relation_type'
   , 'cat_tools.relation_relkind LANGUAGE sql STRICT IMMUTABLE'
   , $body$
 SELECT CASE kind
@@ -341,13 +341,13 @@ SELECT __cat_tools.create_function(
   'cat_tools.relation__relkind'
   , 'kind text'
   , 'cat_tools.relation_relkind LANGUAGE sql STRICT IMMUTABLE'
-  , $body$SELECT cat_tools.relation__relkind(kind::cat_tools.relation_kind)$body$
+  , $body$SELECT cat_tools.relation__relkind(kind::cat_tools.relation_type)$body$
   , 'cat_tools__usage'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.relation__kind'
   , 'relkind text'
-  , 'cat_tools.relation_kind LANGUAGE sql STRICT IMMUTABLE'
+  , 'cat_tools.relation_type LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.relation__kind(relkind::cat_tools.relation_relkind)$body$
   , 'cat_tools__usage'
 );
