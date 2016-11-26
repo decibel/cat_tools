@@ -6,11 +6,16 @@
 
 SET LOCAL ROLE :use_role;
 CREATE TEMP VIEW kinds AS
-  SELECT kind, relkind
-    FROM cat_tools.enum_range_srf('cat_tools.relation_kind') WITH ORDINALITY kind
-      -- Use FULL OUTER to make sure we get errors if anything isn't in sync
-      FULL OUTER JOIN cat_tools.enum_range_srf('cat_tools.relation_relkind') WITH ORDINALITY relkind
-      USING(ordinality)
+  SELECT
+      (cat_tools.enum_range('cat_tools.relation_kind'))[gs] AS kind
+      , (cat_tools.enum_range('cat_tools.relation_relkind'))[gs] AS relkind
+    FROM generate_series(
+      1
+      , greatest(
+        array_upper(cat_tools.enum_range('cat_tools.relation_kind'), 1)
+        , array_upper(cat_tools.enum_range('cat_tools.relation_relkind'), 1)
+      )
+    ) gs
 ;
 
 SELECT plan(
