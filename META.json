@@ -67,11 +67,12 @@
     "X_comment": "Optional. 'prereqs': Prerequisits for the distribution. http://pgxn.org/spec/#prereqs",
     "X_comment": "Valid keys for 'prereqs' are configure, build, runtime, or test.",
     "X_comment": "Valid keys for 'requires' are requires, recommends, suggests, or conflicts.",
+    "X_comment": "Requires named argument support in SQL functions, which started in 9.2",
     "prereqs": {
 
         "build": {
             "requires": {
-                "PostgreSQL": "9.1.0"
+                "PostgreSQL": "9.2.0"
             }
         },
         "runtime": {
