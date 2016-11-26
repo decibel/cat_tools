@@ -15,9 +15,9 @@ $B:
 
 installcheck: $B/cat_tools.sql
 EXTRA_CLEAN += $B/cat_tools.sql
-$B/cat_tools.sql: sql/cat_tools.in.sql Makefile safesed
+$B/cat_tools.sql: sql/cat_tools.in.sql Makefile pgxntool/safesed
 	(echo @generated@ && cat $< && echo @generated@) | sed -e 's#@generated@#-- GENERATED FILE! DO NOT EDIT! See $<#' > $@
 ifeq ($(LT93),yes)
-	./safesed $@ -e 's/, COLUMN/-- Requires 9.3: &/'
+	pgxntool/safesed $@ -e 's/, COLUMN/-- Requires 9.3: &/'
 endif
 
