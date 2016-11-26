@@ -295,25 +295,6 @@ SELECT __cat_tools.create_function(
   , 'cat_tools__usage'
 );
 
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.enum_range'
-  , 'enum regtype'
-  , $$text[] LANGUAGE plpgsql STABLE$$
-  , $body$
-DECLARE
-  ret text[];
-BEGIN
-  EXECUTE format('SELECT pg_catalog.enum_range( NULL::%s )', enum) INTO ret;
-  RETURN ret;
-END
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
 CREATE OR REPLACE VIEW cat_tools.pg_class_v AS
   SELECT *
     FROM _cat_tools.pg_class_v
