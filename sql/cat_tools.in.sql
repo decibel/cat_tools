@@ -176,8 +176,8 @@ CREATE TYPE cat_tools.object_type AS ENUM(
   , 'default acl' -- pg_default_acl
   , 'extension'
   , 'event trigger' -- pg_event_trigger
-  , 'policy'
-  , 'transform'
+  , 'policy' -- SED: REQUIRES 9.5!
+  , 'transform' -- SED: REQUIRES 9.5!
   , 'access method' -- pg_am
 );
 
@@ -858,10 +858,10 @@ SELECT object__catalog
       WHEN 'pg_catalog.pg_class'::regclass THEN 'pg_catalog.regclass'
       WHEN 'pg_catalog.pg_ts_config'::regclass THEN 'pg_catalog.regconfig'
       WHEN 'pg_catalog.pg_ts_dict'::regclass THEN 'pg_catalog.regdictionary'
-      WHEN 'pg_catalog.pg_namespace'::regclass THEN 'pg_catalog.regnamespace'
+      WHEN 'pg_catalog.pg_namespace'::regclass THEN 'pg_catalog.regnamespace' -- SED: REQUIRES 9.5!
       WHEN 'pg_catalog.pg_operator'::regclass THEN 'pg_catalog.regoperator'
       WHEN 'pg_catalog.pg_proc'::regclass THEN 'pg_catalog.regprocedure'
-      WHEN 'pg_catalog.pg_authid'::regclass THEN 'pg_catalog.regrole'
+      WHEN 'pg_catalog.pg_authid'::regclass THEN 'pg_catalog.regrole' -- SED: REQUIRES 9.5!
       WHEN 'pg_catalog.pg_type'::regclass THEN 'pg_catalog.regtype'
     END::pg_catalog.regtype
     , n.attname

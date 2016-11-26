@@ -5,11 +5,30 @@
 -- test_role is set in test/deps.sql
 
 SET LOCAL ROLE :use_role;
+CREATE FUNCTION pg_temp.major()
+RETURNS int LANGUAGE sql IMMUTABLE AS $$
+SELECT current_setting('server_version_num')::int/100
+$$;
+
+CREATE FUNCTION pg_temp.extra_types()
+RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
+SELECT '{}'::text[]
+  || CASE WHEN pg_temp.major() <= 904 THEN '{policy,transform}'::text[] END
+$$;
+
+CREATE TEMP VIEW obj_type AS
+  SELECT object_type::text, true AS is_real
+    FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
+  UNION ALL -- INTENTIONALLY UNION ALL! We want dupes if something gets hosed
+  SELECT u, false
+    FROM unnest(pg_temp.extra_types()) u
+  ORDER BY object_type
+;
 
 SELECT plan(
   0
   + 4 -- no_use tests
-  + 1 * (SELECT count(*)::int FROM cat_tools.enum_range_srf('cat_tools.object_type'))
+  + 2 * (SELECT count(*)::int FROM obj_type)
 );
 
 SET LOCAL ROLE :no_use_role;
@@ -40,10 +59,21 @@ SET LOCAL ROLE :use_role;
 
 -- It doesn't seem worth it to hand-check all of these. Just make sure we get a valid relation for all of them
 SELECT lives_ok(
-      format( $$SELECT * FROM cat_tools.object__catalog(%L)$$, object_type )
+      CASE WHEN is_real THEN format( $$SELECT * FROM cat_tools.object__catalog(%L)$$, object_type )
+      ELSE 'SELECT 1'
+      END
       , format( $$SELECT * FROM cat_tools.object__catalog(%L)$$, object_type )
     )
-  FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
+  FROM obj_type
+;
+
+SELECT lives_ok(
+      CASE WHEN is_real THEN format( $$SELECT * FROM cat_tools.object__reg_type(%L)$$, object_type )
+      ELSE 'SELECT 1'
+      END
+      , format( $$SELECT * FROM cat_tools.object__reg_type(%L)$$, object_type )
+    )
+  FROM obj_type
 ;
 
 \i test/pgxntool/finish.sql
