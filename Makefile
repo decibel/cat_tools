@@ -16,6 +16,6 @@ ifeq ($(LT94),yes)
 	pgxntool/safesed $@ -E -e 's/(.*)-- SED: REQUIRES 9.5!/-- Requires 9.5: \1/'
 endif
 ifeq ($(LT93),yes)
-	pgxntool/safesed $@ -e 's/, COLUMN/-- Requires 9.3: &/'
+	pgxntool/safesed $@ -E -e 's/(.*)-- SED: REQUIRES 9.3!/-- Requires 9.3: \1/'
 endif
 

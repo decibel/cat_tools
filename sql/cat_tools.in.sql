@@ -175,7 +175,7 @@ CREATE TYPE cat_tools.object_type AS ENUM(
   , 'user mapping' -- pg_user_mapping
   , 'default acl' -- pg_default_acl
   , 'extension'
-  , 'event trigger' -- pg_event_trigger
+  , 'event trigger' -- pg_event_trigger -- SED: REQUIRES 9.3!
   , 'policy' -- SED: REQUIRES 9.5!
   , 'transform' -- SED: REQUIRES 9.5!
   , 'access method' -- pg_am
@@ -224,7 +224,7 @@ SELECT CASE
     WHEN 'server' THEN 'pg_foreign_server'
     WHEN 'user mapping' THEN 'pg_user_mapping'
     WHEN 'default acl' THEN 'pg_default_acl'
-    WHEN 'event trigger' THEN 'pg_event_trigger'
+    WHEN 'event trigger' THEN 'pg_event_trigger' -- SED: REQUIRES 9.3!
     WHEN 'access method' THEN 'pg_am'
     ELSE 'pg_' || object_type::text
     END
@@ -548,7 +548,7 @@ BEGIN
     RAISE EXCEPTION '"%" is not a serial column', column_name
       USING ERRCODE = 'wrong_object_type'
         -- TODO: SCHEMA and COLUMN
-        , COLUMN = column_name
+        , COLUMN = column_name -- SED: REQUIRES 9.3!
     ;
   END IF;
 
