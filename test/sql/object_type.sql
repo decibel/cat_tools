@@ -13,8 +13,8 @@ $$;
 CREATE FUNCTION pg_temp.extra_types()
 RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
 SELECT '{}'::text[]
-  || CASE WHEN pg_temp.major() <= 904 THEN '{policy,transform}'::text[] END
-  || CASE WHEN pg_temp.major() <= 903 THEN '{event trigger}'::text[] END
+  || CASE WHEN pg_temp.major() < 905 THEN '{policy,transform}'::text[] END
+  || CASE WHEN pg_temp.major() < 903 THEN '{event trigger}'::text[] END
 $$;
 
 CREATE TEMP VIEW obj_type AS
