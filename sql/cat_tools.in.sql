@@ -32,6 +32,7 @@ CREATE FUNCTION __cat_tools.create_function(
   , options text
   , body text
   , grants text DEFAULT NULL
+  , comment text DEFAULT NULL
 ) RETURNS void LANGUAGE plpgsql AS $body$
 DECLARE
 
@@ -54,6 +55,13 @@ $template$
 GRANT EXECUTE ON FUNCTION %s(
 %s
 ) TO %s;
+$template$
+  ;
+
+  comment_template CONSTANT text := $template$
+COMMENT ON FUNCTION %s(
+%s
+) IS %L;
 $template$
   ;
 
@@ -84,6 +92,16 @@ BEGIN
       ) )
     ;
   END IF;
+
+  IF comment IS NOT NULL THEN
+    PERFORM __cat_tools.exec( format(
+        comment_template
+        , function_name
+        , args
+        , comment
+      ) )
+    ;
+  END IF;
 END
 $body$;
 
@@ -105,9 +123,11 @@ REVOKE ALL ON _cat_tools.pg_class_v FROM public;
 CREATE TYPE cat_tools.constraint_type AS ENUM(
   'domain constraint', 'table constraint'
 );
+COMMENT ON TYPE cat_tools.constraint_type IS $$Descriptive names for every type of Postgres object (table, operator, rule, etc)$$;
 CREATE TYPE cat_tools.procedure_type AS ENUM(
   'aggregate', 'function'
 );
+COMMENT ON TYPE cat_tools.procedure_type IS $$Types of constraints (`domain constraint` or `table_constraint`)$$;
 
 CREATE TYPE cat_tools.relation_type AS ENUM(
   'table'
@@ -119,6 +139,7 @@ CREATE TYPE cat_tools.relation_type AS ENUM(
   , 'composite type'
   , 'foreign table'
 );
+COMMENT ON TYPE cat_tools.relation_type IS $$Types of objects stored in `pg_class`$$;
 
 CREATE TYPE cat_tools.relation_relkind AS ENUM(
   'r'
@@ -130,6 +151,7 @@ CREATE TYPE cat_tools.relation_relkind AS ENUM(
   , 'f'
   , 'm'
 );
+COMMENT ON TYPE cat_tools.relation_relkind IS $$Valid values for `pg_class.relkind`$$;
 
 @generated@
 
@@ -231,6 +253,7 @@ SELECT CASE
   END::pg_catalog.regclass
 $body$
   , 'cat_tools__usage'
+  , 'Returns catalog table that is used to store <object_type> objects'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
@@ -238,6 +261,7 @@ SELECT __cat_tools.create_function(
   , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.object__catalog(object_type::cat_tools.object_type)$body$
   , 'cat_tools__usage'
+  , 'Returns catalog table that is used to store <object_type> objects'
 );
 
 @generated@
@@ -279,6 +303,7 @@ SELECT __cat_tools.create_function(
 SELECT (_cat_tools.catalog_metadata__get(object_catalog)).reg_type
 $body$
   , 'cat_tools__usage'
+  , 'Returns the "reg" pseudotype (ie: regclass) associated with a system catalog (ie: pg_class)'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__reg_type'
@@ -286,6 +311,7 @@ SELECT __cat_tools.create_function(
   , 'pg_catalog.regtype LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.object__reg_type(cat_tools.object__catalog(object_type))$body$
   , 'cat_tools__usage'
+  , 'Returns the "reg" pseudotype (ie: regclass) associated with a system catalog (ie: pg_class)'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__reg_type'
@@ -293,6 +319,7 @@ SELECT __cat_tools.create_function(
   , 'pg_catalog.regtype LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.object__reg_type(object_type::cat_tools.object_type)$body$
   , 'cat_tools__usage'
+  , 'Returns the "reg" pseudotype (ie: regclass) associated with a system catalog (ie: pg_class)'
 );
 
 @generated@
@@ -314,6 +341,7 @@ SELECT CASE relkind
 END::cat_tools.relation_type
 $body$
   , 'cat_tools__usage'
+  , 'Mapping from <pg_class.relkind> to a <cat_tools.relation_type>'
 );
 
 SELECT __cat_tools.create_function(
@@ -333,6 +361,7 @@ SELECT CASE kind
 END::cat_tools.relation_relkind
 $body$
   , 'cat_tools__usage'
+  , 'Mapping from <cat_tools.relation_type> to a <pg_class.relkind> value'
 );
 
 @generated@
@@ -343,6 +372,7 @@ SELECT __cat_tools.create_function(
   , 'cat_tools.relation_relkind LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.relation__relkind(kind::cat_tools.relation_type)$body$
   , 'cat_tools__usage'
+  , 'Mapping from <cat_tools.relation_type> to a <pg_class.relkind> value'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.relation__kind'
@@ -350,6 +380,7 @@ SELECT __cat_tools.create_function(
   , 'cat_tools.relation_type LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.relation__kind(relkind::cat_tools.relation_relkind)$body$
   , 'cat_tools__usage'
+  , 'Mapping from <cat_tools.relation_type> to a <pg_class.relkind> value'
 );
 
 CREATE OR REPLACE VIEW cat_tools.pg_class_v AS
@@ -899,6 +930,7 @@ DROP FUNCTION __cat_tools.create_function(
   , options text
   , body text
   , grants text
+  , comment text
 );
 DROP SCHEMA __cat_tools;
 
