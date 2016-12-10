@@ -213,46 +213,46 @@ SELECT __cat_tools.create_function(
 SELECT (
   'pg_catalog.'
   || CASE
-  WHEN object_type = ANY( array[
-  'table'
-  , 'index'
-  , 'sequence'
-  , 'toast table'
-  , 'view'
-  , 'materialized view'
-  , 'composite type'
-  , 'foreign table'
-    ]::cat_tools.object_type[] )
-  THEN 'pg_class'
-  WHEN object_type = ANY( '{domain constraint,table constraint}'::cat_tools.object_type[] )
-    THEN 'pg_constraint'
-  WHEN object_type = ANY( '{aggregate,function}'::cat_tools.object_type[] )
-    THEN 'pg_proc'
-  ELSE CASE object_type
-    -- Unusual cases
-    -- s/, \(.\{-}\) -- \(.*\)/  WHEN \1 THEN '\2'/
-    WHEN 'default value' THEN 'pg_attrdef'
-    WHEN 'large object' THEN 'pg_largeobject'
-    WHEN 'operator class' THEN 'pg_opclass'
-    WHEN 'operator family' THEN 'pg_opfamily'
-    WHEN 'operator of access method' THEN 'pg_amop'
-    WHEN 'function of access method' THEN 'pg_amproc'
-    WHEN 'rule' THEN 'pg_rewrite'
-    WHEN 'schema' THEN 'pg_namespace'
-    WHEN 'text search parser' THEN 'pg_ts_parser'
-    WHEN 'text search dictionary' THEN 'pg_ts_dict'
-    WHEN 'text search template' THEN 'pg_ts_template'
-    WHEN 'text search configuration' THEN 'pg_ts_config'
-    WHEN 'role' THEN 'pg_authid'
-    WHEN 'foreign-data wrapper' THEN 'pg_foreign_data_wrapper'
-    WHEN 'server' THEN 'pg_foreign_server'
-    WHEN 'user mapping' THEN 'pg_user_mapping'
-    WHEN 'default acl' THEN 'pg_default_acl'
-    WHEN 'event trigger' THEN 'pg_event_trigger' -- SED: REQUIRES 9.3!
-    WHEN 'access method' THEN 'pg_am'
-    ELSE 'pg_' || object_type::text
+    WHEN object_type = ANY( array[
+    'table'
+    , 'index'
+    , 'sequence'
+    , 'toast table'
+    , 'view'
+    , 'materialized view'
+    , 'composite type'
+    , 'foreign table'
+      ]::cat_tools.object_type[] )
+    THEN 'pg_class'
+    WHEN object_type = ANY( '{domain constraint,table constraint}'::cat_tools.object_type[] )
+      THEN 'pg_constraint'
+    WHEN object_type = ANY( '{aggregate,function}'::cat_tools.object_type[] )
+      THEN 'pg_proc'
+    ELSE CASE object_type
+      -- Unusual cases
+      -- s/, \(.\{-}\) -- \(.*\)/  WHEN \1 THEN '\2'/
+      WHEN 'default value' THEN 'pg_attrdef'
+      WHEN 'large object' THEN 'pg_largeobject'
+      WHEN 'operator class' THEN 'pg_opclass'
+      WHEN 'operator family' THEN 'pg_opfamily'
+      WHEN 'operator of access method' THEN 'pg_amop'
+      WHEN 'function of access method' THEN 'pg_amproc'
+      WHEN 'rule' THEN 'pg_rewrite'
+      WHEN 'schema' THEN 'pg_namespace'
+      WHEN 'text search parser' THEN 'pg_ts_parser'
+      WHEN 'text search dictionary' THEN 'pg_ts_dict'
+      WHEN 'text search template' THEN 'pg_ts_template'
+      WHEN 'text search configuration' THEN 'pg_ts_config'
+      WHEN 'role' THEN 'pg_authid'
+      WHEN 'foreign-data wrapper' THEN 'pg_foreign_data_wrapper'
+      WHEN 'server' THEN 'pg_foreign_server'
+      WHEN 'user mapping' THEN 'pg_user_mapping'
+      WHEN 'default acl' THEN 'pg_default_acl'
+      WHEN 'event trigger' THEN 'pg_event_trigger' -- SED: REQUIRES 9.3!
+      WHEN 'access method' THEN 'pg_am'
+      ELSE 'pg_' || object_type::text
+      END
     END
-  END
   )::pg_catalog.regclass
 $body$
   , 'cat_tools__usage'
