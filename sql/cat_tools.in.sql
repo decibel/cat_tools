@@ -210,7 +210,9 @@ SELECT __cat_tools.create_function(
   , 'object_type cat_tools.object_type'
   , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
   , $body$
-SELECT CASE
+SELECT (
+  'pg_catalog.'
+  || CASE
   WHEN object_type = ANY( array[
   'table'
   , 'index'
@@ -250,7 +252,8 @@ SELECT CASE
     WHEN 'access method' THEN 'pg_am'
     ELSE 'pg_' || object_type::text
     END
-  END::pg_catalog.regclass
+  END
+  )::pg_catalog.regclass
 $body$
   , 'cat_tools__usage'
   , 'Returns catalog table that is used to store <object_type> objects'

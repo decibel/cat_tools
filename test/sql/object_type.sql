@@ -30,6 +30,10 @@ SELECT plan(
   0
   + 4 -- no_use tests
   + 2 * (SELECT count(*)::int FROM obj_type)
+
+  -- Catalog search path
+  + 1
+  + 3 * 2
 );
 
 SET LOCAL ROLE :no_use_role;
@@ -76,6 +80,41 @@ SELECT lives_ok(
     )
   FROM obj_type
 ;
+
+-- Verify catalog correctness
+SELECT lives_ok(
+  $$SET search_path = public,tap,pg_catalog$$ -- Note that we must explicitly set pg_catalog at the end of the path
+  , 'Change search_path'
+);
+
+SELECT lives_ok(
+  'CREATE TABLE pg_class()'
+  , 'Create bogus pg_class table'
+);
+SELECT lives_ok(
+  'CREATE TYPE regclass AS ENUM()'
+  , 'Create bogus regclass type'
+);
+SELECT isnt(
+  'pg_class'::pg_catalog.regclass
+  , 'pg_catalog.pg_class'::pg_catalog.regclass
+  , $$Simple 'pg_class'::pg_catalog.regclass should not return pg_catalog.pg_class$$
+);
+SELECT isnt(
+  'regclass'::regtype
+  , 'pg_catalog.regclass'::regtype
+  , $$Simple 'regclass'::regtype should not return pg_catalog.regtype$$
+);
+SELECT is(
+  cat_tools.object__catalog('table')
+  , 'pg_catalog.pg_class'::pg_catalog.regclass
+  , $$cat_tools.object__catalog('table') returns pg_catalog.pg_class$$
+);
+SELECT is(
+  cat_tools.object__reg_type('table')
+  , 'pg_catalog.regclass'::regtype
+  , $$cat_tools.object__catalog('table') returns pg_catalog.pg_class$$
+);
 
 \i test/pgxntool/finish.sql
 

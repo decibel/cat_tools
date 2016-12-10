@@ -1,5 +1,5 @@
 \set ECHO none
-1..90
+1..97
 ok 1 - Permission denied trying to use types
 ok 2 - Permission denied trying to use types
 ok 3 - Permission denied trying to use types
@@ -90,4 +90,11 @@ ok 87 - SELECT * FROM cat_tools.object__reg_type('trigger')
 ok 88 - SELECT * FROM cat_tools.object__reg_type('type')
 ok 89 - SELECT * FROM cat_tools.object__reg_type('user mapping')
 ok 90 - SELECT * FROM cat_tools.object__reg_type('view')
+ok 91 - Change search_path
+ok 92 - Create bogus pg_class table
+ok 93 - Create bogus regclass type
+ok 94 - Simple 'pg_class'::pg_catalog.regclass should not return pg_catalog.pg_class
+ok 95 - Simple 'regclass'::regtype should not return pg_catalog.regtype
+ok 96 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
+ok 97 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
 # TRANSACTION INTENTIONALLY LEFT OPEN!
