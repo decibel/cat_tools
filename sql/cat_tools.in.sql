@@ -535,20 +535,20 @@ AS
     JOIN pg_catalog.pg_class c2     ON (c2.oid = k1.confrelid)
     JOIN pg_catalog.pg_namespace n2 ON (n2.oid = c2.relnamespace)
     JOIN pg_catalog.pg_depend d     ON (
-                 d.classid = 'pg_constraint'::regclass  -- @generated@
+                 d.classid = 'pg_constraint'::pg_catalog.regclass  -- @generated@
              AND d.objid = k1.oid
              AND d.objsubid = 0
              AND d.deptype = 'n'
-             AND d.refclassid = 'pg_class'::regclass
+             AND d.refclassid = 'pg_class'::pg_catalog.regclass
              AND d.refobjsubid=0
          )
     JOIN pg_catalog.pg_class ci ON (ci.oid = d.refobjid AND ci.relkind = 'i')
     LEFT JOIN pg_depend d2      ON (
-                 d2.classid = 'pg_class'::regclass      -- @generated@
+                 d2.classid = 'pg_class'::pg_catalog.regclass      -- @generated@
              AND d2.objid = ci.oid
              AND d2.objsubid = 0
              AND d2.deptype = 'i'
-             AND d2.refclassid = 'pg_constraint'::regclass
+             AND d2.refclassid = 'pg_constraint'::pg_catalog.regclass
              AND d2.refobjsubid = 0
          )
     LEFT JOIN pg_catalog.pg_constraint k2 ON (          -- @generated@
@@ -573,7 +573,7 @@ $$
   , $$bigint LANGUAGE plpgsql$$
   , $body$
 DECLARE
-  seq regclass;
+  seq pg_catalog.regclass;
 BEGIN
   -- Note: the function will throw an error if table or column doesn't exist
   seq := pg_get_serial_sequence( table_name, column_name );
@@ -596,7 +596,7 @@ $body$
 
 SELECT __cat_tools.create_function(
   'cat_tools.enum_range'
-  , 'enum regtype'
+  , 'enum pg_catalog.regtype'
   , $$text[] LANGUAGE plpgsql STABLE$$
   , $body$
 DECLARE
@@ -613,7 +613,7 @@ $body$
 
 SELECT __cat_tools.create_function(
   'cat_tools.enum_range_srf'
-  , 'enum regtype'
+  , 'enum pg_catalog.regtype'
   , $$SETOF text LANGUAGE sql$$
   , $body$
 SELECT * FROM unnest( cat_tools.enum_range($1) ) AS r(enum_label)
@@ -623,7 +623,7 @@ $body$
 
 SELECT __cat_tools.create_function(
   'cat_tools.pg_class'
-  , 'rel regclass'
+  , 'rel pg_catalog.regclass'
   , $$cat_tools.pg_class_v LANGUAGE sql STABLE$$
   , $body$
 SELECT * FROM cat_tools.pg_class_v WHERE reloid = $1
@@ -652,17 +652,17 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.function__arg_types'
   , $$arguments text$$
-  , $$regtype[] LANGUAGE plpgsql$$
+  , $$pg_catalog.regtype[] LANGUAGE plpgsql$$
   , $body$
 DECLARE
-  input_arg_types regtype[];
+  input_arg_types pg_catalog.regtype[];
 
   c_template CONSTANT text := $fmt$CREATE FUNCTION pg_temp.cat_tools__function__arg_types__temp_function(
     %s
   ) RETURNS %s LANGUAGE plpgsql AS 'BEGIN NULL; END'
   $fmt$;
 
-  temp_proc regprocedure;
+  temp_proc pg_catalog.regprocedure;
   sql text;
 BEGIN
   sql := format(
@@ -672,7 +672,7 @@ BEGIN
   );
   --RAISE DEBUG 'Executing SQL %', sql;
   DECLARE
-    v_type regtype;
+    v_type pg_catalog.regtype;
   BEGIN
     EXECUTE sql;
   EXCEPTION WHEN invalid_function_definition THEN
@@ -691,10 +691,10 @@ BEGIN
    * only one function with this name. The cast to regprocedure is for the sake
    * of the DROP down below.
    */
-  EXECUTE $$SELECT 'pg_temp.cat_tools__function__arg_types__temp_function'::regproc::regprocedure$$ INTO temp_proc;
+  EXECUTE $$SELECT 'pg_temp.cat_tools__function__arg_types__temp_function'::pg_catalog.regproc::pg_catalog.regprocedure$$ INTO temp_proc;
   SELECT INTO STRICT input_arg_types
       -- This is here to re-cast the array as 1-based instead of 0 based (better solutions welcome!)
-      string_to_array(proargtypes::text,' ')::regtype[]
+      string_to_array(proargtypes::text,' ')::pg_catalog.regtype[]
     FROM pg_proc
     WHERE oid = temp_proc
   ;
@@ -729,13 +729,13 @@ SELECT __cat_tools.create_function(
   , $$
   function_name text
   , arguments text$$
-  , $$regprocedure LANGUAGE sql$$
+  , $$pg_catalog.regprocedure LANGUAGE sql$$
   , $body$
 SELECT format(
   '%s(%s)'
   , $1
   , cat_tools.function__arg_types_text($2)
-)::regprocedure
+)::pg_catalog.regprocedure
 $body$
   , 'cat_tools__usage'
 );
@@ -785,7 +785,7 @@ BEGIN
   v_work := replace( v_work, timing || ' ', '' );
 
   -- Get array of events (INSERT, UPDATE [OF column, column], DELETE, TRUNCATE)
-  v_on_clause := ' ON ' || r_trigger.tgrelid::regclass || ' ';
+  v_on_clause := ' ON ' || r_trigger.tgrelid::pg_catalog.regclass || ' ';
   v_array := regexp_split_to_array( v_work, v_on_clause );
   events := string_to_array( v_array[1], ' OR ' );
   -- Get everything after ON table_name
@@ -796,14 +796,14 @@ BEGIN
   IF r_trigger.tgconstrrelid<>0 THEN
     v_work := replace(
       v_work
-      , 'FROM ' || r_trigger.tgconstrrelid::regclass || ' '
+      , 'FROM ' || r_trigger.tgconstrrelid::pg_catalog.regclass || ' '
       , ''
     );
   END IF;
   RAISE DEBUG 'v_work "%"', v_work;
 
   -- Get function arguments
-  v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::regproc || E'\\(';
+  v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::pg_catalog.regproc || E'\\(';
   v_array := regexp_split_to_array( v_work, v_execute_clause );
   function_arguments := rtrim( v_array[2], ')' ); -- Yank trailing )
   -- Get everything prior to EXECUTE PROCEDURE ...
@@ -844,7 +844,7 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.trigger__get_oid__loose'
   , $$
-  trigger_table regclass
+  trigger_table pg_catalog.regclass
   , trigger_name text
 $$
   , $$oid LANGUAGE sql$$
@@ -863,7 +863,7 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.trigger__get_oid'
   , $$
-  trigger_table regclass
+  trigger_table pg_catalog.regclass
   , trigger_name text
 $$
   , $$oid LANGUAGE plpgsql$$
@@ -889,14 +889,14 @@ $body$
 INSERT INTO _cat_tools.catalog_metadata(object_catalog, reg_type, namespace_field)
 SELECT object__catalog
     , CASE object__catalog
-      WHEN 'pg_catalog.pg_class'::regclass THEN 'pg_catalog.regclass'
-      WHEN 'pg_catalog.pg_ts_config'::regclass THEN 'pg_catalog.regconfig'
-      WHEN 'pg_catalog.pg_ts_dict'::regclass THEN 'pg_catalog.regdictionary'
-      WHEN 'pg_catalog.pg_namespace'::regclass THEN 'pg_catalog.regnamespace' -- SED: REQUIRES 9.5!
-      WHEN 'pg_catalog.pg_operator'::regclass THEN 'pg_catalog.regoperator'
-      WHEN 'pg_catalog.pg_proc'::regclass THEN 'pg_catalog.regprocedure'
-      WHEN 'pg_catalog.pg_authid'::regclass THEN 'pg_catalog.regrole' -- SED: REQUIRES 9.5!
-      WHEN 'pg_catalog.pg_type'::regclass THEN 'pg_catalog.regtype'
+      WHEN 'pg_catalog.pg_class'::pg_catalog.regclass THEN 'pg_catalog.regclass'
+      WHEN 'pg_catalog.pg_ts_config'::pg_catalog.regclass THEN 'pg_catalog.regconfig'
+      WHEN 'pg_catalog.pg_ts_dict'::pg_catalog.regclass THEN 'pg_catalog.regdictionary'
+      WHEN 'pg_catalog.pg_namespace'::pg_catalog.regclass THEN 'pg_catalog.regnamespace' -- SED: REQUIRES 9.5!
+      WHEN 'pg_catalog.pg_operator'::pg_catalog.regclass THEN 'pg_catalog.regoperator'
+      WHEN 'pg_catalog.pg_proc'::pg_catalog.regclass THEN 'pg_catalog.regprocedure'
+      WHEN 'pg_catalog.pg_authid'::pg_catalog.regclass THEN 'pg_catalog.regrole' -- SED: REQUIRES 9.5!
+      WHEN 'pg_catalog.pg_type'::pg_catalog.regclass THEN 'pg_catalog.regtype'
     END::pg_catalog.regtype
     , n.attname
   FROM (
@@ -910,11 +910,11 @@ SELECT object__catalog
 ;
 UPDATE _cat_tools.catalog_metadata
   SET simple_reg_type = 'pg_catalog.regproc'
-  WHERE object_catalog = 'pg_catalog.pg_proc'::regclass
+  WHERE object_catalog = 'pg_catalog.pg_proc'::pg_catalog.regclass
 ;
 UPDATE _cat_tools.catalog_metadata
   SET simple_reg_type = 'pg_catalog.regoper'
-  WHERE object_catalog = 'pg_catalog.pg_operator'::regclass
+  WHERE object_catalog = 'pg_catalog.pg_operator'::pg_catalog.regclass
 ;
 -- Cluster to get rid of dead rows
 CLUSTER _cat_tools.catalog_metadata USING catalog_metadata__pk_object_catalog;
