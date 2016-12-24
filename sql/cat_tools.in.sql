@@ -206,6 +206,36 @@ CREATE TYPE cat_tools.object_type AS ENUM(
 @generated@
 
 SELECT __cat_tools.create_function(
+  'cat_tools.object__address_args_lookup'
+  , 'object_type cat_tools.object_type'
+  , 'pg_catalog.text[] LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT (
+  '{'
+  || CASE object_type
+      WHEN 'aggregate' THEN 'proargtypes' -- pg_proc
+      WHEN 'function' THEN 'proargtypes' -- pg_proc
+
+      WHEN 'cast' THEN 'casttarget' -- pg_cast
+      WHEN 'domain constraint' THEN 'conname' -- pg_constraint
+      WHEN 'default value' THEN 'adnum' -- pg_attrdef
+      WHEN 'operator' THEN 'oprleft, oprright' -- pg_operator
+      WHEN 'operator of access method' THEN 'amoplefttype, amoprighttype' -- pg_amop
+      WHEN 'function of access method' THEN 'amproclefttype, amprocrighttype' -- pg_amproc
+      WHEN 'user mapping' THEN '(SELECT srvname FROM pg_catalog.pg_foreign_server WHERE pg_foreign_server.oid = omserver)'
+      WHEN 'default acl' THEN 'defaclobjtype' -- pg_default_acl
+      WHEN 'transform' THEN 'SELECT lanname FROM pg_catalog.pg_language WHERE pg_language.oid = trflang)' -- SED: REQUIRES 9.5!
+    END
+    || '}'
+  )::text[]
+$body$
+  , 'cat_tools__usage'
+  , 'Returns a set of lookups that can potentially be used with pg_get_object_address()'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
   , 'object_type cat_tools.object_type'
   , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
@@ -258,6 +288,7 @@ $body$
   , 'cat_tools__usage'
   , 'Returns catalog table that is used to store <object_type> objects'
 );
+@generated@
 SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
   , 'object_type text'
