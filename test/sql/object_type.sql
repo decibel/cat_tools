@@ -29,7 +29,10 @@ CREATE TEMP VIEW obj_type AS
 SELECT plan(
   0
   + 4 -- no_use tests
-  + 2 * (SELECT count(*)::int FROM obj_type)
+  + 1 -- definition
+  + 3 * (SELECT count(*)::int FROM obj_type)
+
+  + 3 -- object__regtype_catalog
 
   -- Catalog search path
   + 1
@@ -62,12 +65,45 @@ SELECT throws_ok(
 
 SET LOCAL ROLE :use_role;
 
--- It doesn't seem worth it to hand-check all of these. Just make sure we get a valid relation for all of them
+SELECT function_returns(
+  'cat_tools'
+  , 'object__catalog'
+  , array[ 'cat_tools.object_type'::name ]
+  , 'regclass'::name
+);
+
+-- object__regtype_catalog
+SELECT throws_ok(
+  $$SELECT cat_tools.object__reg_type_catalog('int'::regtype)$$
+  , '42809'
+  , 'integer is not a object identifier type'
+  , $$Invalid object identifier type throws correct error$$
+);
+CREATE TYPE pg_temp.regtest AS RANGE(subtype = int);
+SELECT throws_ok(
+  $$SELECT cat_tools.object__reg_type_catalog('pg_temp.regtest'::regtype)$$
+  , '0A000'
+  , 'object identifier type regtest is not supported'
+  , $$Invalid pseudotype throws correct error$$
+);
+
+SELECT is(
+  cat_tools.object__reg_type_catalog('regclass'::regtype)
+  , 'pg_class'::regclass
+  , $$Sanity-check cat_tools.object__reg_type_catalog('regclass'::regtype)$$
+); -- TODO: all reg*
+
+/*
+ * It doesn't seem worth it to hand-check all of these. Just make sure we get a valid relation for all of them.
+ *
+ * NOTE: Since object__catalog returns regclass we know anything it returns must at least be a valid relation.
+ * Should probably at least verify that whatever is returned lives in pg_catalog...
+ */
 SELECT lives_ok(
       CASE WHEN is_real THEN format( $$SELECT * FROM cat_tools.object__catalog(%L)$$, object_type )
       ELSE 'SELECT 1'
       END
-      , format( $$SELECT * FROM cat_tools.object__catalog(%L)$$, object_type )
+      , format( $$lives_ok: SELECT * FROM cat_tools.object__catalog(%L)$$, object_type )
     )
   FROM obj_type
 ;
@@ -76,7 +112,20 @@ SELECT lives_ok(
       CASE WHEN is_real THEN format( $$SELECT * FROM cat_tools.object__reg_type(%L)$$, object_type )
       ELSE 'SELECT 1'
       END
-      , format( $$SELECT * FROM cat_tools.object__reg_type(%L)$$, object_type )
+      , format( $$lives_ok: SELECT * FROM cat_tools.object__reg_type(%L)$$, object_type )
+    )
+  FROM obj_type
+;
+
+
+-- Verify object__address_classid
+SELECT is(
+      cat_tools.object__address_classid(object_type)
+      , CASE
+          WHEN object_type::text LIKE '% column' THEN 'pg_class'::regclass
+          ELSE cat_tools.object__catalog(object_type)
+        END
+      , format( 'Verify cat_tools.object__address_classid(%L)', object_type )
     )
   FROM obj_type
 ;

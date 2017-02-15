@@ -1,0 +1,8 @@
+\set ECHO none
+1..5
+ok 1 - Verify public has no perms
+ok 2 - Non-existent relation throws error
+ok 3 - Non-existent column throws error
+ok 4 - Verify details of pg_class.relname
+ok 5 - Verify details of pg_tables.tablename
+# TRANSACTION INTENTIONALLY LEFT OPEN!

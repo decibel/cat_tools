@@ -72,7 +72,7 @@ BEGIN
       create_template
       , function_name
       , args
-      , options
+      , options -- TODO: Force search_path if options ~* 'definer'
       , body
     ) )
   ;
@@ -165,6 +165,18 @@ CREATE TYPE cat_tools.object_type AS ENUM(
   , 'materialized view'
   , 'composite type'
   , 'foreign table'
+  /*
+   * NOTE! These are a bit weird because columns live in pg_attribute, but
+   * address stuff recognizes columns as part of pg_class with a subobjid <> 0!
+   */
+  , 'table column'
+  , 'index column'
+  , 'sequence column'
+  , 'toast table column'
+  , 'view column'
+  , 'materialized view column'
+  , 'composite type column'
+  , 'foreign table column'
   -- pg_constraint
   , 'domain constraint', 'table constraint'
   -- pg_proc
@@ -258,6 +270,8 @@ SELECT (
       THEN 'pg_constraint'
     WHEN object_type = ANY( '{aggregate,function}'::cat_tools.object_type[] )
       THEN 'pg_proc'
+    WHEN object_type::text LIKE '% column'
+      THEN 'pg_attribute'
     ELSE CASE object_type
       -- Unusual cases
       -- s/, \(.\{-}\) -- \(.*\)/  WHEN \1 THEN '\2'/
@@ -300,6 +314,31 @@ SELECT __cat_tools.create_function(
 
 @generated@
 
+SELECT __cat_tools.create_function(
+  'cat_tools.object__address_classid'
+  , 'object_type cat_tools.object_type'
+  , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT CASE
+  WHEN c = 'pg_catalog.pg_attribute'::regclass THEN 'pg_catalog.pg_class'::regclass
+  ELSE c
+  END
+  FROM cat_tools.object__catalog(object_type::cat_tools.object_type) c
+$body$
+  , 'cat_tools__usage'
+  , 'Returns the classid used by the pg_*_object*() functions for an object_type'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__address_classid'
+  , 'object_type text'
+  , 'pg_catalog.regclass LANGUAGE sql STRICT IMMUTABLE'
+  , $body$SELECT cat_tools.object__address_classid(object_type::cat_tools.object_type)$body$
+  , 'cat_tools__usage'
+  , 'Returns the classid used by the pg_*_object*() functions for an object_type'
+);
+
+@generated@
+
 CREATE TABLE _cat_tools.catalog_metadata(
   object_catalog    pg_catalog.regclass
     CONSTRAINT catalog_metadata__pk_object_catalog PRIMARY KEY
@@ -337,7 +376,7 @@ SELECT __cat_tools.create_function(
 SELECT (_cat_tools.catalog_metadata__get(object_catalog)).reg_type
 $body$
   , 'cat_tools__usage'
-  , 'Returns the "reg" pseudotype (ie: regclass) associated with a system catalog (ie: pg_class)'
+  , 'Returns the object identifier type (ie: regclass) associated with a system catalog (ie: pg_class).'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__reg_type'
@@ -345,7 +384,7 @@ SELECT __cat_tools.create_function(
   , 'pg_catalog.regtype LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.object__reg_type(cat_tools.object__catalog(object_type))$body$
   , 'cat_tools__usage'
-  , 'Returns the "reg" pseudotype (ie: regclass) associated with a system catalog (ie: pg_class)'
+  , 'Returns the object identifier type (ie: regclass) associated with a system catalog (ie: pg_class).'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__reg_type'
@@ -353,7 +392,44 @@ SELECT __cat_tools.create_function(
   , 'pg_catalog.regtype LANGUAGE sql STRICT IMMUTABLE'
   , $body$SELECT cat_tools.object__reg_type(object_type::cat_tools.object_type)$body$
   , 'cat_tools__usage'
-  , 'Returns the "reg" pseudotype (ie: regclass) associated with a system catalog (ie: pg_class)'
+  , 'Returns the object identifier type (ie: regclass) associated with a system catalog (ie: pg_class).'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.object__reg_type_catalog'
+  , 'object_identifier_type regtype'
+  , 'pg_catalog.regclass LANGUAGE plpgsql SECURITY DEFINER STRICT IMMUTABLE'
+  , $body$
+DECLARE
+  cat pg_catalog.regclass;
+BEGIN
+  SELECT INTO STRICT cat
+      object_catalog
+    FROM _cat_tools.catalog_metadata m
+    WHERE m.reg_type = object_identifier_type
+      OR m.simple_reg_type = object_identifier_type
+  ;
+  RETURN cat;
+EXCEPTION WHEN no_data_found THEN
+  IF object_identifier_type::text LIKE 'reg%' THEN
+    RAISE 'object identifier type % is not supported', object_identifier_type
+      USING
+        HINT = format( 'If %I is a valid object identifier type please open an issue on github.', object_identifier_type )
+        , ERRCODE = 'feature_not_supported'
+    ;
+  ELSE
+    RAISE '% is not a object identifier type', object_identifier_type
+      USING
+        HINT = 'See https://www.postgresql.org/docs/current/static/datatype-oid.html'
+        , ERRCODE = 'wrong_object_type'
+    ;
+  END IF;
+END
+$body$
+  , 'cat_tools__usage'
+  , 'Returns the system catalog that stores a particular object identifier type.'
 );
 
 @generated@
@@ -592,6 +668,36 @@ AS
      AND _cat_tools._pg_sv_table_accessible(n1.oid, c1.oid)
 ;
 GRANT SELECT ON cat_tools.pg_all_foreign_keys TO cat_tools__usage;
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.pg_attribute__get'
+  , $$
+  relation pg_catalog.regclass
+  , column_name name
+$$
+  , $$pg_catalog.pg_attribute LANGUAGE plpgsql$$
+  , $body$
+DECLARE
+  r pg_catalog.pg_attribute;
+BEGIN
+  SELECT INTO STRICT r
+      *
+    FROM pg_catalog.pg_attribute
+    WHERE attrelid = relation
+      AND attname = column_name
+  ;
+  RETURN r;
+EXCEPTION WHEN no_data_found THEN
+  RAISE 'column "%" of relation "%" does not exist', column_name, relation
+    USING ERRCODE = 'undefined_column'
+  ;
+END
+$body$
+  , 'cat_tools__usage'
+);
+
 
 @generated@
 
