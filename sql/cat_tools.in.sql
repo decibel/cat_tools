@@ -218,6 +218,39 @@ CREATE TYPE cat_tools.object_type AS ENUM(
 @generated@
 
 SELECT __cat_tools.create_function(
+  'cat_tools.objects__shared'
+  , ''
+  , 'cat_tools.object_type[] LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT '{role,database,tablespace}'::cat_tools.object_type[]
+$body$
+  , 'cat_tools__usage'
+  , 'Returns array of types for shared objects.'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.objects__shared_srf'
+  , ''
+  , 'SETOF cat_tools.object_type LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT * FROM pg_catalog.unnest(cat_tools.objects__shared())
+$body$
+  , 'cat_tools__usage'
+  , 'Returns set of types for shared objects.'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__is_shared'
+  , 'object_type cat_tools.object_type'
+  , 'boolean LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT object_type = ANY(cat_tools.objects__shared())
+$body$
+  , 'cat_tools__usage'
+  , 'Returns true if object_type is a shared object.'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
   'cat_tools.object__address_args_lookup'
   , 'object_type cat_tools.object_type'
   , 'pg_catalog.text[] LANGUAGE sql STRICT IMMUTABLE'

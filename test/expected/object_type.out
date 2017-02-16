@@ -1,5 +1,5 @@
 \set ECHO none
-1..168
+1..169
 ok 1 - Permission denied trying to use types
 ok 2 - Permission denied trying to use types
 ok 3 - Permission denied trying to use types
@@ -168,4 +168,5 @@ ok 165 - Simple 'pg_class'::pg_catalog.regclass should not return pg_catalog.pg_
 ok 166 - Simple 'regclass'::regtype should not return pg_catalog.regtype
 ok 167 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
 ok 168 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
+ok 169 - Verify objects__shared_src() returns correct values
 # TRANSACTION INTENTIONALLY LEFT OPEN!

@@ -37,6 +37,8 @@ SELECT plan(
   -- Catalog search path
   + 1
   + 3 * 2
+
+  + 1 -- objects__shared
 );
 
 SET LOCAL ROLE :no_use_role;
@@ -163,6 +165,26 @@ SELECT is(
   cat_tools.object__reg_type('table')
   , 'pg_catalog.regclass'::regtype
   , $$cat_tools.object__catalog('table') returns pg_catalog.pg_class$$
+);
+
+SELECT bag_eq(
+  $$SELECT * FROM cat_tools.objects__shared_srf()$$
+  , array(
+    SELECT type::cat_tools.object_type FROM
+      -- types and their catalogs
+      (SELECT *, cat_tools.object__catalog(type) FROM cat_tools.enum_range_srf('cat_tools.object_type') type) a
+      JOIN pg_catalog.pg_class c ON c.oid = a.object__catalog
+      WHERE NOT EXISTS(
+          -- Does the table have a column with relid or namespace in the column name?
+          SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema='pg_catalog'
+              AND table_name = a.object__catalog::text
+              AND column_name ~ 'relid|namespace'
+        )
+        AND c.reltablespace=(SELECT oid FROM pg_tablespace WHERE spcname = 'pg_global')
+  )
+  , 'Verify objects__shared_src() returns correct values'
 );
 
 \i test/pgxntool/finish.sql
