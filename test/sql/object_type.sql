@@ -121,7 +121,8 @@ SELECT lives_ok(
 
 
 -- Verify object__address_classid
-SELECT is(
+SELECT CASE WHEN is_real THEN
+    is(
       cat_tools.object__address_classid(object_type)
       , CASE
           WHEN object_type::text LIKE '% column' THEN 'pg_class'::regclass
@@ -129,6 +130,11 @@ SELECT is(
         END
       , format( 'Verify cat_tools.object__address_classid(%L)', object_type )
     )
+  ELSE
+    pass(
+      format( 'Verify cat_tools.object__address_classid(%L)', object_type )
+    )
+  END
   FROM obj_type
 ;
 
