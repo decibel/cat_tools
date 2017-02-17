@@ -878,6 +878,10 @@ BEGIN
 END
 $body$
   , 'cat_tools__usage'
+  , 'Returns argument types for a function argument body as an array. Unlike a
+  normal regprocedure cast, this function accepts anything that is valid when
+  defining a function.'
+
 );
 
 @generated@
@@ -890,6 +894,10 @@ SELECT __cat_tools.create_function(
 SELECT array_to_string(cat_tools.function__arg_types($1), ', ')
 $body$
   , 'cat_tools__usage'
+  , 'Returns argument types for a function argument body as text. Unlike a
+  normal regprocedure cast, this function accepts anything that is valid when
+  defining a function.'
+
 );
 
 @generated@
@@ -908,6 +916,9 @@ SELECT format(
 )::pg_catalog.regprocedure
 $body$
   , 'cat_tools__usage'
+  , 'Returns a regprocedure for a given function name and arguments. Unlike a
+  normal regprocedure cast, arguments can contain anything that is valid when
+  defining a function.'
 );
 
 @generated@
