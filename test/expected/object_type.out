@@ -1,5 +1,5 @@
 \set ECHO none
-1..169
+1..220
 ok 1 - Permission denied trying to use types
 ok 2 - Permission denied trying to use types
 ok 3 - Permission denied trying to use types
@@ -8,165 +8,216 @@ ok 5 - Function cat_tools.object__catalog(cat_tools.object_type) should return r
 ok 6 - Invalid object identifier type throws correct error
 ok 7 - Invalid pseudotype throws correct error
 ok 8 - Sanity-check cat_tools.object__reg_type_catalog('regclass'::regtype)
-ok 9 - lives_ok: SELECT * FROM cat_tools.object__catalog('access method')
-ok 10 - lives_ok: SELECT * FROM cat_tools.object__catalog('aggregate')
-ok 11 - lives_ok: SELECT * FROM cat_tools.object__catalog('cast')
-ok 12 - lives_ok: SELECT * FROM cat_tools.object__catalog('collation')
-ok 13 - lives_ok: SELECT * FROM cat_tools.object__catalog('composite type')
-ok 14 - lives_ok: SELECT * FROM cat_tools.object__catalog('composite type column')
-ok 15 - lives_ok: SELECT * FROM cat_tools.object__catalog('conversion')
-ok 16 - lives_ok: SELECT * FROM cat_tools.object__catalog('database')
-ok 17 - lives_ok: SELECT * FROM cat_tools.object__catalog('default acl')
-ok 18 - lives_ok: SELECT * FROM cat_tools.object__catalog('default value')
-ok 19 - lives_ok: SELECT * FROM cat_tools.object__catalog('domain constraint')
-ok 20 - lives_ok: SELECT * FROM cat_tools.object__catalog('event trigger')
-ok 21 - lives_ok: SELECT * FROM cat_tools.object__catalog('extension')
-ok 22 - lives_ok: SELECT * FROM cat_tools.object__catalog('foreign table')
-ok 23 - lives_ok: SELECT * FROM cat_tools.object__catalog('foreign table column')
-ok 24 - lives_ok: SELECT * FROM cat_tools.object__catalog('foreign-data wrapper')
-ok 25 - lives_ok: SELECT * FROM cat_tools.object__catalog('function')
-ok 26 - lives_ok: SELECT * FROM cat_tools.object__catalog('function of access method')
-ok 27 - lives_ok: SELECT * FROM cat_tools.object__catalog('index')
-ok 28 - lives_ok: SELECT * FROM cat_tools.object__catalog('index column')
-ok 29 - lives_ok: SELECT * FROM cat_tools.object__catalog('language')
-ok 30 - lives_ok: SELECT * FROM cat_tools.object__catalog('large object')
-ok 31 - lives_ok: SELECT * FROM cat_tools.object__catalog('materialized view')
-ok 32 - lives_ok: SELECT * FROM cat_tools.object__catalog('materialized view column')
-ok 33 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator')
-ok 34 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator class')
-ok 35 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator family')
-ok 36 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator of access method')
-ok 37 - lives_ok: SELECT * FROM cat_tools.object__catalog('policy')
-ok 38 - lives_ok: SELECT * FROM cat_tools.object__catalog('role')
-ok 39 - lives_ok: SELECT * FROM cat_tools.object__catalog('rule')
-ok 40 - lives_ok: SELECT * FROM cat_tools.object__catalog('schema')
-ok 41 - lives_ok: SELECT * FROM cat_tools.object__catalog('sequence')
-ok 42 - lives_ok: SELECT * FROM cat_tools.object__catalog('sequence column')
-ok 43 - lives_ok: SELECT * FROM cat_tools.object__catalog('server')
-ok 44 - lives_ok: SELECT * FROM cat_tools.object__catalog('table')
-ok 45 - lives_ok: SELECT * FROM cat_tools.object__catalog('table column')
-ok 46 - lives_ok: SELECT * FROM cat_tools.object__catalog('table constraint')
-ok 47 - lives_ok: SELECT * FROM cat_tools.object__catalog('tablespace')
-ok 48 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search configuration')
-ok 49 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search dictionary')
-ok 50 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search parser')
-ok 51 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search template')
-ok 52 - lives_ok: SELECT * FROM cat_tools.object__catalog('toast table')
-ok 53 - lives_ok: SELECT * FROM cat_tools.object__catalog('toast table column')
-ok 54 - lives_ok: SELECT * FROM cat_tools.object__catalog('transform')
-ok 55 - lives_ok: SELECT * FROM cat_tools.object__catalog('trigger')
-ok 56 - lives_ok: SELECT * FROM cat_tools.object__catalog('type')
-ok 57 - lives_ok: SELECT * FROM cat_tools.object__catalog('user mapping')
-ok 58 - lives_ok: SELECT * FROM cat_tools.object__catalog('view')
-ok 59 - lives_ok: SELECT * FROM cat_tools.object__catalog('view column')
-ok 60 - lives_ok: SELECT * FROM cat_tools.object__reg_type('access method')
-ok 61 - lives_ok: SELECT * FROM cat_tools.object__reg_type('aggregate')
-ok 62 - lives_ok: SELECT * FROM cat_tools.object__reg_type('cast')
-ok 63 - lives_ok: SELECT * FROM cat_tools.object__reg_type('collation')
-ok 64 - lives_ok: SELECT * FROM cat_tools.object__reg_type('composite type')
-ok 65 - lives_ok: SELECT * FROM cat_tools.object__reg_type('composite type column')
-ok 66 - lives_ok: SELECT * FROM cat_tools.object__reg_type('conversion')
-ok 67 - lives_ok: SELECT * FROM cat_tools.object__reg_type('database')
-ok 68 - lives_ok: SELECT * FROM cat_tools.object__reg_type('default acl')
-ok 69 - lives_ok: SELECT * FROM cat_tools.object__reg_type('default value')
-ok 70 - lives_ok: SELECT * FROM cat_tools.object__reg_type('domain constraint')
-ok 71 - lives_ok: SELECT * FROM cat_tools.object__reg_type('event trigger')
-ok 72 - lives_ok: SELECT * FROM cat_tools.object__reg_type('extension')
-ok 73 - lives_ok: SELECT * FROM cat_tools.object__reg_type('foreign table')
-ok 74 - lives_ok: SELECT * FROM cat_tools.object__reg_type('foreign table column')
-ok 75 - lives_ok: SELECT * FROM cat_tools.object__reg_type('foreign-data wrapper')
-ok 76 - lives_ok: SELECT * FROM cat_tools.object__reg_type('function')
-ok 77 - lives_ok: SELECT * FROM cat_tools.object__reg_type('function of access method')
-ok 78 - lives_ok: SELECT * FROM cat_tools.object__reg_type('index')
-ok 79 - lives_ok: SELECT * FROM cat_tools.object__reg_type('index column')
-ok 80 - lives_ok: SELECT * FROM cat_tools.object__reg_type('language')
-ok 81 - lives_ok: SELECT * FROM cat_tools.object__reg_type('large object')
-ok 82 - lives_ok: SELECT * FROM cat_tools.object__reg_type('materialized view')
-ok 83 - lives_ok: SELECT * FROM cat_tools.object__reg_type('materialized view column')
-ok 84 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator')
-ok 85 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator class')
-ok 86 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator family')
-ok 87 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator of access method')
-ok 88 - lives_ok: SELECT * FROM cat_tools.object__reg_type('policy')
-ok 89 - lives_ok: SELECT * FROM cat_tools.object__reg_type('role')
-ok 90 - lives_ok: SELECT * FROM cat_tools.object__reg_type('rule')
-ok 91 - lives_ok: SELECT * FROM cat_tools.object__reg_type('schema')
-ok 92 - lives_ok: SELECT * FROM cat_tools.object__reg_type('sequence')
-ok 93 - lives_ok: SELECT * FROM cat_tools.object__reg_type('sequence column')
-ok 94 - lives_ok: SELECT * FROM cat_tools.object__reg_type('server')
-ok 95 - lives_ok: SELECT * FROM cat_tools.object__reg_type('table')
-ok 96 - lives_ok: SELECT * FROM cat_tools.object__reg_type('table column')
-ok 97 - lives_ok: SELECT * FROM cat_tools.object__reg_type('table constraint')
-ok 98 - lives_ok: SELECT * FROM cat_tools.object__reg_type('tablespace')
-ok 99 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search configuration')
-ok 100 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search dictionary')
-ok 101 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search parser')
-ok 102 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search template')
-ok 103 - lives_ok: SELECT * FROM cat_tools.object__reg_type('toast table')
-ok 104 - lives_ok: SELECT * FROM cat_tools.object__reg_type('toast table column')
-ok 105 - lives_ok: SELECT * FROM cat_tools.object__reg_type('transform')
-ok 106 - lives_ok: SELECT * FROM cat_tools.object__reg_type('trigger')
-ok 107 - lives_ok: SELECT * FROM cat_tools.object__reg_type('type')
-ok 108 - lives_ok: SELECT * FROM cat_tools.object__reg_type('user mapping')
-ok 109 - lives_ok: SELECT * FROM cat_tools.object__reg_type('view')
-ok 110 - lives_ok: SELECT * FROM cat_tools.object__reg_type('view column')
-ok 111 - Verify cat_tools.object__address_classid('access method')
-ok 112 - Verify cat_tools.object__address_classid('aggregate')
-ok 113 - Verify cat_tools.object__address_classid('cast')
-ok 114 - Verify cat_tools.object__address_classid('collation')
-ok 115 - Verify cat_tools.object__address_classid('composite type')
-ok 116 - Verify cat_tools.object__address_classid('composite type column')
-ok 117 - Verify cat_tools.object__address_classid('conversion')
-ok 118 - Verify cat_tools.object__address_classid('database')
-ok 119 - Verify cat_tools.object__address_classid('default acl')
-ok 120 - Verify cat_tools.object__address_classid('default value')
-ok 121 - Verify cat_tools.object__address_classid('domain constraint')
-ok 122 - Verify cat_tools.object__address_classid('event trigger')
-ok 123 - Verify cat_tools.object__address_classid('extension')
-ok 124 - Verify cat_tools.object__address_classid('foreign table')
-ok 125 - Verify cat_tools.object__address_classid('foreign table column')
-ok 126 - Verify cat_tools.object__address_classid('foreign-data wrapper')
-ok 127 - Verify cat_tools.object__address_classid('function')
-ok 128 - Verify cat_tools.object__address_classid('function of access method')
-ok 129 - Verify cat_tools.object__address_classid('index')
-ok 130 - Verify cat_tools.object__address_classid('index column')
-ok 131 - Verify cat_tools.object__address_classid('language')
-ok 132 - Verify cat_tools.object__address_classid('large object')
-ok 133 - Verify cat_tools.object__address_classid('materialized view')
-ok 134 - Verify cat_tools.object__address_classid('materialized view column')
-ok 135 - Verify cat_tools.object__address_classid('operator')
-ok 136 - Verify cat_tools.object__address_classid('operator class')
-ok 137 - Verify cat_tools.object__address_classid('operator family')
-ok 138 - Verify cat_tools.object__address_classid('operator of access method')
-ok 139 - Verify cat_tools.object__address_classid('policy')
-ok 140 - Verify cat_tools.object__address_classid('role')
-ok 141 - Verify cat_tools.object__address_classid('rule')
-ok 142 - Verify cat_tools.object__address_classid('schema')
-ok 143 - Verify cat_tools.object__address_classid('sequence')
-ok 144 - Verify cat_tools.object__address_classid('sequence column')
-ok 145 - Verify cat_tools.object__address_classid('server')
-ok 146 - Verify cat_tools.object__address_classid('table')
-ok 147 - Verify cat_tools.object__address_classid('table column')
-ok 148 - Verify cat_tools.object__address_classid('table constraint')
-ok 149 - Verify cat_tools.object__address_classid('tablespace')
-ok 150 - Verify cat_tools.object__address_classid('text search configuration')
-ok 151 - Verify cat_tools.object__address_classid('text search dictionary')
-ok 152 - Verify cat_tools.object__address_classid('text search parser')
-ok 153 - Verify cat_tools.object__address_classid('text search template')
-ok 154 - Verify cat_tools.object__address_classid('toast table')
-ok 155 - Verify cat_tools.object__address_classid('toast table column')
-ok 156 - Verify cat_tools.object__address_classid('transform')
-ok 157 - Verify cat_tools.object__address_classid('trigger')
-ok 158 - Verify cat_tools.object__address_classid('type')
-ok 159 - Verify cat_tools.object__address_classid('user mapping')
-ok 160 - Verify cat_tools.object__address_classid('view')
-ok 161 - Verify cat_tools.object__address_classid('view column')
-ok 162 - Change search_path
-ok 163 - Create bogus pg_class table
-ok 164 - Create bogus regclass type
-ok 165 - Simple 'pg_class'::pg_catalog.regclass should not return pg_catalog.pg_class
-ok 166 - Simple 'regclass'::regtype should not return pg_catalog.regtype
-ok 167 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
-ok 168 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
-ok 169 - Verify objects__shared_src() returns correct values
+ok 9 - object type 'access method' does not throw not addressable error
+ok 10 - object type 'aggregate' does not throw not addressable error
+ok 11 - object type 'cast' does not throw not addressable error
+ok 12 - object type 'collation' does not throw not addressable error
+ok 13 - object type 'composite type' correctly marked as not addressable
+ok 14 - object type 'composite type column' correctly marked as not addressable
+ok 15 - object type 'conversion' does not throw not addressable error
+ok 16 - object type 'database' does not throw not addressable error
+ok 17 - object type 'default acl' does not throw not addressable error
+ok 18 - object type 'default value' does not throw not addressable error
+ok 19 - object type 'domain constraint' does not throw not addressable error
+ok 20 - object type 'event trigger' does not throw not addressable error
+ok 21 - object type 'extension' does not throw not addressable error
+ok 22 - object type 'foreign table' does not throw not addressable error
+ok 23 - object type 'foreign table column' does not throw not addressable error
+ok 24 - object type 'foreign-data wrapper' does not throw not addressable error
+ok 25 - object type 'function' does not throw not addressable error
+ok 26 - object type 'function of access method' does not throw not addressable error
+ok 27 - object type 'index' does not throw not addressable error
+ok 28 - object type 'index column' correctly marked as not addressable
+ok 29 - object type 'language' does not throw not addressable error
+ok 30 - object type 'large object' does not throw not addressable error
+ok 31 - object type 'materialized view' does not throw not addressable error
+ok 32 - object type 'materialized view column' correctly marked as not addressable
+ok 33 - object type 'operator' does not throw not addressable error
+ok 34 - object type 'operator class' does not throw not addressable error
+ok 35 - object type 'operator family' does not throw not addressable error
+ok 36 - object type 'operator of access method' does not throw not addressable error
+ok 37 - object type 'policy' does not throw not addressable error
+ok 38 - object type 'role' does not throw not addressable error
+ok 39 - object type 'rule' does not throw not addressable error
+ok 40 - object type 'schema' does not throw not addressable error
+ok 41 - object type 'sequence' does not throw not addressable error
+ok 42 - object type 'sequence column' correctly marked as not addressable
+ok 43 - object type 'server' does not throw not addressable error
+ok 44 - object type 'table' does not throw not addressable error
+ok 45 - object type 'table column' does not throw not addressable error
+ok 46 - object type 'table constraint' does not throw not addressable error
+ok 47 - object type 'tablespace' does not throw not addressable error
+ok 48 - object type 'text search configuration' does not throw not addressable error
+ok 49 - object type 'text search dictionary' does not throw not addressable error
+ok 50 - object type 'text search parser' does not throw not addressable error
+ok 51 - object type 'text search template' does not throw not addressable error
+ok 52 - object type 'toast table' correctly marked as not addressable
+ok 53 - object type 'toast table column' correctly marked as not addressable
+ok 54 - object type 'transform' does not throw not addressable error
+ok 55 - object type 'trigger' does not throw not addressable error
+ok 56 - object type 'type' does not throw not addressable error
+ok 57 - object type 'user mapping' does not throw not addressable error
+ok 58 - object type 'view' does not throw not addressable error
+ok 59 - object type 'view column' correctly marked as not addressable
+ok 60 - lives_ok: SELECT * FROM cat_tools.object__catalog('access method')
+ok 61 - lives_ok: SELECT * FROM cat_tools.object__catalog('aggregate')
+ok 62 - lives_ok: SELECT * FROM cat_tools.object__catalog('cast')
+ok 63 - lives_ok: SELECT * FROM cat_tools.object__catalog('collation')
+ok 64 - lives_ok: SELECT * FROM cat_tools.object__catalog('composite type')
+ok 65 - lives_ok: SELECT * FROM cat_tools.object__catalog('composite type column')
+ok 66 - lives_ok: SELECT * FROM cat_tools.object__catalog('conversion')
+ok 67 - lives_ok: SELECT * FROM cat_tools.object__catalog('database')
+ok 68 - lives_ok: SELECT * FROM cat_tools.object__catalog('default acl')
+ok 69 - lives_ok: SELECT * FROM cat_tools.object__catalog('default value')
+ok 70 - lives_ok: SELECT * FROM cat_tools.object__catalog('domain constraint')
+ok 71 - lives_ok: SELECT * FROM cat_tools.object__catalog('event trigger')
+ok 72 - lives_ok: SELECT * FROM cat_tools.object__catalog('extension')
+ok 73 - lives_ok: SELECT * FROM cat_tools.object__catalog('foreign table')
+ok 74 - lives_ok: SELECT * FROM cat_tools.object__catalog('foreign table column')
+ok 75 - lives_ok: SELECT * FROM cat_tools.object__catalog('foreign-data wrapper')
+ok 76 - lives_ok: SELECT * FROM cat_tools.object__catalog('function')
+ok 77 - lives_ok: SELECT * FROM cat_tools.object__catalog('function of access method')
+ok 78 - lives_ok: SELECT * FROM cat_tools.object__catalog('index')
+ok 79 - lives_ok: SELECT * FROM cat_tools.object__catalog('index column')
+ok 80 - lives_ok: SELECT * FROM cat_tools.object__catalog('language')
+ok 81 - lives_ok: SELECT * FROM cat_tools.object__catalog('large object')
+ok 82 - lives_ok: SELECT * FROM cat_tools.object__catalog('materialized view')
+ok 83 - lives_ok: SELECT * FROM cat_tools.object__catalog('materialized view column')
+ok 84 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator')
+ok 85 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator class')
+ok 86 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator family')
+ok 87 - lives_ok: SELECT * FROM cat_tools.object__catalog('operator of access method')
+ok 88 - lives_ok: SELECT * FROM cat_tools.object__catalog('policy')
+ok 89 - lives_ok: SELECT * FROM cat_tools.object__catalog('role')
+ok 90 - lives_ok: SELECT * FROM cat_tools.object__catalog('rule')
+ok 91 - lives_ok: SELECT * FROM cat_tools.object__catalog('schema')
+ok 92 - lives_ok: SELECT * FROM cat_tools.object__catalog('sequence')
+ok 93 - lives_ok: SELECT * FROM cat_tools.object__catalog('sequence column')
+ok 94 - lives_ok: SELECT * FROM cat_tools.object__catalog('server')
+ok 95 - lives_ok: SELECT * FROM cat_tools.object__catalog('table')
+ok 96 - lives_ok: SELECT * FROM cat_tools.object__catalog('table column')
+ok 97 - lives_ok: SELECT * FROM cat_tools.object__catalog('table constraint')
+ok 98 - lives_ok: SELECT * FROM cat_tools.object__catalog('tablespace')
+ok 99 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search configuration')
+ok 100 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search dictionary')
+ok 101 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search parser')
+ok 102 - lives_ok: SELECT * FROM cat_tools.object__catalog('text search template')
+ok 103 - lives_ok: SELECT * FROM cat_tools.object__catalog('toast table')
+ok 104 - lives_ok: SELECT * FROM cat_tools.object__catalog('toast table column')
+ok 105 - lives_ok: SELECT * FROM cat_tools.object__catalog('transform')
+ok 106 - lives_ok: SELECT * FROM cat_tools.object__catalog('trigger')
+ok 107 - lives_ok: SELECT * FROM cat_tools.object__catalog('type')
+ok 108 - lives_ok: SELECT * FROM cat_tools.object__catalog('user mapping')
+ok 109 - lives_ok: SELECT * FROM cat_tools.object__catalog('view')
+ok 110 - lives_ok: SELECT * FROM cat_tools.object__catalog('view column')
+ok 111 - lives_ok: SELECT * FROM cat_tools.object__reg_type('access method')
+ok 112 - lives_ok: SELECT * FROM cat_tools.object__reg_type('aggregate')
+ok 113 - lives_ok: SELECT * FROM cat_tools.object__reg_type('cast')
+ok 114 - lives_ok: SELECT * FROM cat_tools.object__reg_type('collation')
+ok 115 - lives_ok: SELECT * FROM cat_tools.object__reg_type('composite type')
+ok 116 - lives_ok: SELECT * FROM cat_tools.object__reg_type('composite type column')
+ok 117 - lives_ok: SELECT * FROM cat_tools.object__reg_type('conversion')
+ok 118 - lives_ok: SELECT * FROM cat_tools.object__reg_type('database')
+ok 119 - lives_ok: SELECT * FROM cat_tools.object__reg_type('default acl')
+ok 120 - lives_ok: SELECT * FROM cat_tools.object__reg_type('default value')
+ok 121 - lives_ok: SELECT * FROM cat_tools.object__reg_type('domain constraint')
+ok 122 - lives_ok: SELECT * FROM cat_tools.object__reg_type('event trigger')
+ok 123 - lives_ok: SELECT * FROM cat_tools.object__reg_type('extension')
+ok 124 - lives_ok: SELECT * FROM cat_tools.object__reg_type('foreign table')
+ok 125 - lives_ok: SELECT * FROM cat_tools.object__reg_type('foreign table column')
+ok 126 - lives_ok: SELECT * FROM cat_tools.object__reg_type('foreign-data wrapper')
+ok 127 - lives_ok: SELECT * FROM cat_tools.object__reg_type('function')
+ok 128 - lives_ok: SELECT * FROM cat_tools.object__reg_type('function of access method')
+ok 129 - lives_ok: SELECT * FROM cat_tools.object__reg_type('index')
+ok 130 - lives_ok: SELECT * FROM cat_tools.object__reg_type('index column')
+ok 131 - lives_ok: SELECT * FROM cat_tools.object__reg_type('language')
+ok 132 - lives_ok: SELECT * FROM cat_tools.object__reg_type('large object')
+ok 133 - lives_ok: SELECT * FROM cat_tools.object__reg_type('materialized view')
+ok 134 - lives_ok: SELECT * FROM cat_tools.object__reg_type('materialized view column')
+ok 135 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator')
+ok 136 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator class')
+ok 137 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator family')
+ok 138 - lives_ok: SELECT * FROM cat_tools.object__reg_type('operator of access method')
+ok 139 - lives_ok: SELECT * FROM cat_tools.object__reg_type('policy')
+ok 140 - lives_ok: SELECT * FROM cat_tools.object__reg_type('role')
+ok 141 - lives_ok: SELECT * FROM cat_tools.object__reg_type('rule')
+ok 142 - lives_ok: SELECT * FROM cat_tools.object__reg_type('schema')
+ok 143 - lives_ok: SELECT * FROM cat_tools.object__reg_type('sequence')
+ok 144 - lives_ok: SELECT * FROM cat_tools.object__reg_type('sequence column')
+ok 145 - lives_ok: SELECT * FROM cat_tools.object__reg_type('server')
+ok 146 - lives_ok: SELECT * FROM cat_tools.object__reg_type('table')
+ok 147 - lives_ok: SELECT * FROM cat_tools.object__reg_type('table column')
+ok 148 - lives_ok: SELECT * FROM cat_tools.object__reg_type('table constraint')
+ok 149 - lives_ok: SELECT * FROM cat_tools.object__reg_type('tablespace')
+ok 150 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search configuration')
+ok 151 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search dictionary')
+ok 152 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search parser')
+ok 153 - lives_ok: SELECT * FROM cat_tools.object__reg_type('text search template')
+ok 154 - lives_ok: SELECT * FROM cat_tools.object__reg_type('toast table')
+ok 155 - lives_ok: SELECT * FROM cat_tools.object__reg_type('toast table column')
+ok 156 - lives_ok: SELECT * FROM cat_tools.object__reg_type('transform')
+ok 157 - lives_ok: SELECT * FROM cat_tools.object__reg_type('trigger')
+ok 158 - lives_ok: SELECT * FROM cat_tools.object__reg_type('type')
+ok 159 - lives_ok: SELECT * FROM cat_tools.object__reg_type('user mapping')
+ok 160 - lives_ok: SELECT * FROM cat_tools.object__reg_type('view')
+ok 161 - lives_ok: SELECT * FROM cat_tools.object__reg_type('view column')
+ok 162 - Verify cat_tools.object__address_classid('access method')
+ok 163 - Verify cat_tools.object__address_classid('aggregate')
+ok 164 - Verify cat_tools.object__address_classid('cast')
+ok 165 - Verify cat_tools.object__address_classid('collation')
+ok 166 - Verify cat_tools.object__address_classid('composite type')
+ok 167 - Verify cat_tools.object__address_classid('composite type column')
+ok 168 - Verify cat_tools.object__address_classid('conversion')
+ok 169 - Verify cat_tools.object__address_classid('database')
+ok 170 - Verify cat_tools.object__address_classid('default acl')
+ok 171 - Verify cat_tools.object__address_classid('default value')
+ok 172 - Verify cat_tools.object__address_classid('domain constraint')
+ok 173 - Verify cat_tools.object__address_classid('event trigger')
+ok 174 - Verify cat_tools.object__address_classid('extension')
+ok 175 - Verify cat_tools.object__address_classid('foreign table')
+ok 176 - Verify cat_tools.object__address_classid('foreign table column')
+ok 177 - Verify cat_tools.object__address_classid('foreign-data wrapper')
+ok 178 - Verify cat_tools.object__address_classid('function')
+ok 179 - Verify cat_tools.object__address_classid('function of access method')
+ok 180 - Verify cat_tools.object__address_classid('index')
+ok 181 - Verify cat_tools.object__address_classid('index column')
+ok 182 - Verify cat_tools.object__address_classid('language')
+ok 183 - Verify cat_tools.object__address_classid('large object')
+ok 184 - Verify cat_tools.object__address_classid('materialized view')
+ok 185 - Verify cat_tools.object__address_classid('materialized view column')
+ok 186 - Verify cat_tools.object__address_classid('operator')
+ok 187 - Verify cat_tools.object__address_classid('operator class')
+ok 188 - Verify cat_tools.object__address_classid('operator family')
+ok 189 - Verify cat_tools.object__address_classid('operator of access method')
+ok 190 - Verify cat_tools.object__address_classid('policy')
+ok 191 - Verify cat_tools.object__address_classid('role')
+ok 192 - Verify cat_tools.object__address_classid('rule')
+ok 193 - Verify cat_tools.object__address_classid('schema')
+ok 194 - Verify cat_tools.object__address_classid('sequence')
+ok 195 - Verify cat_tools.object__address_classid('sequence column')
+ok 196 - Verify cat_tools.object__address_classid('server')
+ok 197 - Verify cat_tools.object__address_classid('table')
+ok 198 - Verify cat_tools.object__address_classid('table column')
+ok 199 - Verify cat_tools.object__address_classid('table constraint')
+ok 200 - Verify cat_tools.object__address_classid('tablespace')
+ok 201 - Verify cat_tools.object__address_classid('text search configuration')
+ok 202 - Verify cat_tools.object__address_classid('text search dictionary')
+ok 203 - Verify cat_tools.object__address_classid('text search parser')
+ok 204 - Verify cat_tools.object__address_classid('text search template')
+ok 205 - Verify cat_tools.object__address_classid('toast table')
+ok 206 - Verify cat_tools.object__address_classid('toast table column')
+ok 207 - Verify cat_tools.object__address_classid('transform')
+ok 208 - Verify cat_tools.object__address_classid('trigger')
+ok 209 - Verify cat_tools.object__address_classid('type')
+ok 210 - Verify cat_tools.object__address_classid('user mapping')
+ok 211 - Verify cat_tools.object__address_classid('view')
+ok 212 - Verify cat_tools.object__address_classid('view column')
+ok 213 - Change search_path
+ok 214 - Create bogus pg_class table
+ok 215 - Create bogus regclass type
+ok 216 - Simple 'pg_class'::pg_catalog.regclass should not return pg_catalog.pg_class
+ok 217 - Simple 'regclass'::regtype should not return pg_catalog.regtype
+ok 218 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
+ok 219 - cat_tools.object__catalog('table') returns pg_catalog.pg_class
+ok 220 - Verify objects__shared_src() returns correct values
 # TRANSACTION INTENTIONALLY LEFT OPEN!

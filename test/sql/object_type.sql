@@ -26,11 +26,35 @@ CREATE TEMP VIEW obj_type AS
   ORDER BY 1 -- Intentionally done by ordinal
 ;
 
+CREATE FUNCTION pg_temp.throws_other(
+  cmd text
+  , errcode text
+  , description text
+) RETURNS text LANGUAGE plpgsql AS $body$
+BEGIN
+  EXECUTE cmd;
+  RETURN ok(false, description) || E'\n'
+    || diag('      caught: no exception')
+  ;
+EXCEPTION WHEN others THEN
+  IF errcode = SQLSTATE THEN
+    RETURN ok( FALSE, description ) || E'\n' || diag(
+           '      caught: ' || SQLSTATE || ': ' || SQLERRM ||
+        E'\n      wanted: any other error' )
+    ;
+  ELSE
+    RETURN ok( TRUE, description );
+  END IF;
+END
+$body$;
+
 SELECT plan(
   0
   + 4 -- no_use tests
   + 1 -- definition
   + 3 * (SELECT count(*)::int FROM obj_type)
+
+  + (SELECT count(*)::int FROM obj_type) -- object__is_address_unsupported()
 
   + 3 -- object__regtype_catalog
 
@@ -94,6 +118,39 @@ SELECT is(
   , 'pg_class'::regclass
   , $$Sanity-check cat_tools.object__reg_type_catalog('regclass'::regtype)$$
 ); -- TODO: all reg*
+
+
+/*
+ * Verify all object types are either marked as not addressable or don't throw
+ * that error in pg_get_object_address().
+ */
+SELECT CASE
+  WHEN cat_tools.object__is_address_unsupported(object_type) THEN
+    throws_ok(
+       format(
+        $$SELECT pg_get_object_address(%L,array[''],array[''])$$
+        , object_type
+      )
+      , '22023'
+      , format( 'unsupported object type "%s"', object_type )
+      , format( 'object type %L correctly marked as not addressable', object_type )
+    )
+  WHEN NOT is_real THEN -- Assume not real objects would still be addressible...
+    pass(
+      format( 'object type %L does not throw not addressable error', object_type )
+    )
+  ELSE
+    pg_temp.throws_other(
+       format(
+        $$pg_get_object_address(%L,array[''],array[''])$$
+        , object_type
+      )
+      , ''
+      , format( 'object type %L does not throw not addressable error', object_type )
+    )
+  END
+  FROM obj_type
+;
 
 /*
  * It doesn't seem worth it to hand-check all of these. Just make sure we get a valid relation for all of them.

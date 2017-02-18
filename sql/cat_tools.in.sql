@@ -178,6 +178,7 @@ CREATE TYPE cat_tools.object_type AS ENUM(
   , 'composite type column'
   , 'foreign table column'
   -- pg_constraint
+  -- NOTE: a domain itself is considered to be a type
   , 'domain constraint', 'table constraint'
   -- pg_proc
   , 'aggregate', 'function'
@@ -225,7 +226,7 @@ SELECT __cat_tools.create_function(
 SELECT '{role,database,tablespace}'::cat_tools.object_type[]
 $body$
   , 'cat_tools__usage'
-  , 'Returns array of types for shared objects.'
+  , 'Returns array of object types for shared objects.'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.objects__shared_srf'
@@ -235,7 +236,7 @@ SELECT __cat_tools.create_function(
 SELECT * FROM pg_catalog.unnest(cat_tools.objects__shared())
 $body$
   , 'cat_tools__usage'
-  , 'Returns set of types for shared objects.'
+  , 'Returns set of object types for shared objects.'
 );
 SELECT __cat_tools.create_function(
   'cat_tools.object__is_shared'
@@ -246,6 +247,64 @@ SELECT object_type = ANY(cat_tools.objects__shared())
 $body$
   , 'cat_tools__usage'
   , 'Returns true if object_type is a shared object.'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__is_shared'
+  , 'object_type text'
+  , 'boolean LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT cat_tools.object__is_shared(object_type::cat_tools.object_type)
+$body$
+  , 'cat_tools__usage'
+  , 'Returns true if object_type is a shared object.'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.objects__address_unsupported'
+  , ''
+  , 'cat_tools.object_type[] LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT array[
+  'toast table'::cat_tools.object_type, 'composite type'
+  , 'index column' , 'sequence column', 'toast table column', 'view column'
+  , 'materialized view column', 'composite type column'
+]
+$body$
+  , 'cat_tools__usage'
+  , 'Returns array of object types not supported by pg_get_object_address().'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.objects__address_unsupported_srf'
+  , ''
+  , 'SETOF cat_tools.object_type LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT * FROM pg_catalog.unnest(cat_tools.objects__address_unsupported())
+$body$
+  , 'cat_tools__usage'
+  , 'Returns set of object types not supported by pg_get_object_address().'
+);
+@generated@
+SELECT __cat_tools.create_function(
+  'cat_tools.object__is_address_unsupported'
+  , 'object_type cat_tools.object_type'
+  , 'boolean LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT object_type = ANY(cat_tools.objects__address_unsupported())
+$body$
+  , 'cat_tools__usage'
+  , 'Returns true if object type is not supported by pg_get_object_address().'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.object__is_address_unsupported'
+  , 'object_type text'
+  , 'boolean LANGUAGE sql STRICT IMMUTABLE'
+  , $body$
+SELECT cat_tools.object__is_address_unsupported(object_type::cat_tools.object_type)
+$body$
+  , 'cat_tools__usage'
+  , 'Returns true if object type is not supported by pg_get_object_address().'
 );
 
 @generated@
