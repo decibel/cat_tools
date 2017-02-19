@@ -307,6 +307,7 @@ $body$
   , 'Returns true if object type is not supported by pg_get_object_address().'
 );
 
+/*
 @generated@
 
 SELECT __cat_tools.create_function(
@@ -336,7 +337,7 @@ $body$
   , 'cat_tools__usage'
   , 'Returns a set of lookups that can potentially be used with pg_get_object_address()'
 );
-
+*/
 @generated@
 
 SELECT __cat_tools.create_function(
