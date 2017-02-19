@@ -586,6 +586,36 @@ SELECT __cat_tools.create_function(
   , 'Mapping from <cat_tools.relation_type> to a <pg_class.relkind> value'
 );
 
+@generated@
+
+CREATE OR REPLACE VIEW _cat_tools.pg_depend_identity_v AS
+  SELECT o.type AS object_type
+      , o.schema AS object_schema
+      , o.name AS object_name
+      , o.identity AS object_identity
+      , r.type AS reference_type
+      , r.schema AS reference_schema
+      , r.name AS reference_name
+      , r.identity AS reference_identity
+      , d.*
+    FROM pg_catalog.pg_depend d
+      , pg_catalog.pg_identify_object(classid, objid, objsubid) o
+      , pg_catalog.pg_identify_object(refclassid, refobjid, refobjsubid) r
+    WHERE classid <> 0
+  UNION ALL
+  SELECT NULL, NULL, NULL, NULL
+      , r.type AS reference_type
+      , r.schema AS reference_schema
+      , r.name AS reference_name
+      , r.identity AS reference_identity
+      , d.*
+    FROM pg_catalog.pg_depend d
+      , pg_catalog.pg_identify_object(refclassid, refobjid, refobjsubid) r
+    WHERE classid = 0
+;
+
+@generated@
+
 CREATE OR REPLACE VIEW cat_tools.pg_class_v AS
   SELECT *
     FROM _cat_tools.pg_class_v
