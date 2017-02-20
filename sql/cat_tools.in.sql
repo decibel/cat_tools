@@ -107,7 +107,7 @@ $body$;
 
 @generated@
 
-CREATE SCHEMA cat_tools;
+-- Schema already created via CREATE EXTENSION
 GRANT USAGE ON SCHEMA cat_tools TO cat_tools__usage;
 CREATE SCHEMA _cat_tools;
 

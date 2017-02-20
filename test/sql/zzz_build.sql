@@ -3,6 +3,8 @@
 \i test/pgxntool/psql.sql
 
 BEGIN;
+CREATE SCHEMA cat_tools;
+
 \i sql/cat_tools.sql
 
 \echo # TRANSACTION INTENTIONALLY LEFT OPEN!
