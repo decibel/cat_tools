@@ -8,57 +8,57 @@ ok 5 - Function cat_tools.object__catalog(cat_tools.object_type) should return r
 ok 6 - Invalid object identifier type throws correct error
 ok 7 - Invalid pseudotype throws correct error
 ok 8 - Sanity-check cat_tools.object__reg_type_catalog('regclass'::regtype)
-ok 9 - object type 'access method' does not throw not addressable error
-ok 10 - object type 'aggregate' does not throw not addressable error
-ok 11 - object type 'cast' does not throw not addressable error
-ok 12 - object type 'collation' does not throw not addressable error
-ok 13 - object type 'composite type' correctly marked as not addressable
-ok 14 - object type 'composite type column' correctly marked as not addressable
-ok 15 - object type 'conversion' does not throw not addressable error
-ok 16 - object type 'database' does not throw not addressable error
-ok 17 - object type 'default acl' does not throw not addressable error
-ok 18 - object type 'default value' does not throw not addressable error
-ok 19 - object type 'domain constraint' does not throw not addressable error
-ok 20 - object type 'event trigger' does not throw not addressable error
-ok 21 - object type 'extension' does not throw not addressable error
-ok 22 - object type 'foreign table' does not throw not addressable error
-ok 23 - object type 'foreign table column' does not throw not addressable error
-ok 24 - object type 'foreign-data wrapper' does not throw not addressable error
-ok 25 - object type 'function' does not throw not addressable error
-ok 26 - object type 'function of access method' does not throw not addressable error
-ok 27 - object type 'index' does not throw not addressable error
-ok 28 - object type 'index column' correctly marked as not addressable
-ok 29 - object type 'language' does not throw not addressable error
-ok 30 - object type 'large object' does not throw not addressable error
-ok 31 - object type 'materialized view' does not throw not addressable error
-ok 32 - object type 'materialized view column' correctly marked as not addressable
-ok 33 - object type 'operator' does not throw not addressable error
-ok 34 - object type 'operator class' does not throw not addressable error
-ok 35 - object type 'operator family' does not throw not addressable error
-ok 36 - object type 'operator of access method' does not throw not addressable error
-ok 37 - object type 'policy' does not throw not addressable error
-ok 38 - object type 'role' does not throw not addressable error
-ok 39 - object type 'rule' does not throw not addressable error
-ok 40 - object type 'schema' does not throw not addressable error
-ok 41 - object type 'sequence' does not throw not addressable error
-ok 42 - object type 'sequence column' correctly marked as not addressable
-ok 43 - object type 'server' does not throw not addressable error
-ok 44 - object type 'table' does not throw not addressable error
-ok 45 - object type 'table column' does not throw not addressable error
-ok 46 - object type 'table constraint' does not throw not addressable error
-ok 47 - object type 'tablespace' does not throw not addressable error
-ok 48 - object type 'text search configuration' does not throw not addressable error
-ok 49 - object type 'text search dictionary' does not throw not addressable error
-ok 50 - object type 'text search parser' does not throw not addressable error
-ok 51 - object type 'text search template' does not throw not addressable error
-ok 52 - object type 'toast table' correctly marked as not addressable
-ok 53 - object type 'toast table column' correctly marked as not addressable
-ok 54 - object type 'transform' does not throw not addressable error
-ok 55 - object type 'trigger' does not throw not addressable error
-ok 56 - object type 'type' does not throw not addressable error
-ok 57 - object type 'user mapping' does not throw not addressable error
-ok 58 - object type 'view' does not throw not addressable error
-ok 59 - object type 'view column' correctly marked as not addressable
+ok 9 - check addressability for object type 'access method'
+ok 10 - check addressability for object type 'aggregate'
+ok 11 - check addressability for object type 'cast'
+ok 12 - check addressability for object type 'collation'
+ok 13 - check addressability for object type 'composite type'
+ok 14 - check addressability for object type 'composite type column'
+ok 15 - check addressability for object type 'conversion'
+ok 16 - check addressability for object type 'database'
+ok 17 - check addressability for object type 'default acl'
+ok 18 - check addressability for object type 'default value'
+ok 19 - check addressability for object type 'domain constraint'
+ok 20 - check addressability for object type 'event trigger'
+ok 21 - check addressability for object type 'extension'
+ok 22 - check addressability for object type 'foreign table'
+ok 23 - check addressability for object type 'foreign table column'
+ok 24 - check addressability for object type 'foreign-data wrapper'
+ok 25 - check addressability for object type 'function'
+ok 26 - check addressability for object type 'function of access method'
+ok 27 - check addressability for object type 'index'
+ok 28 - check addressability for object type 'index column'
+ok 29 - check addressability for object type 'language'
+ok 30 - check addressability for object type 'large object'
+ok 31 - check addressability for object type 'materialized view'
+ok 32 - check addressability for object type 'materialized view column'
+ok 33 - check addressability for object type 'operator'
+ok 34 - check addressability for object type 'operator class'
+ok 35 - check addressability for object type 'operator family'
+ok 36 - check addressability for object type 'operator of access method'
+ok 37 - check addressability for object type 'policy'
+ok 38 - check addressability for object type 'role'
+ok 39 - check addressability for object type 'rule'
+ok 40 - check addressability for object type 'schema'
+ok 41 - check addressability for object type 'sequence'
+ok 42 - check addressability for object type 'sequence column'
+ok 43 - check addressability for object type 'server'
+ok 44 - check addressability for object type 'table'
+ok 45 - check addressability for object type 'table column'
+ok 46 - check addressability for object type 'table constraint'
+ok 47 - check addressability for object type 'tablespace'
+ok 48 - check addressability for object type 'text search configuration'
+ok 49 - check addressability for object type 'text search dictionary'
+ok 50 - check addressability for object type 'text search parser'
+ok 51 - check addressability for object type 'text search template'
+ok 52 - check addressability for object type 'toast table'
+ok 53 - check addressability for object type 'toast table column'
+ok 54 - check addressability for object type 'transform'
+ok 55 - check addressability for object type 'trigger'
+ok 56 - check addressability for object type 'type'
+ok 57 - check addressability for object type 'user mapping'
+ok 58 - check addressability for object type 'view'
+ok 59 - check addressability for object type 'view column'
 ok 60 - lives_ok: SELECT * FROM cat_tools.object__catalog('access method')
 ok 61 - lives_ok: SELECT * FROM cat_tools.object__catalog('aggregate')
 ok 62 - lives_ok: SELECT * FROM cat_tools.object__catalog('cast')

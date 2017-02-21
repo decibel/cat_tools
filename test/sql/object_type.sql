@@ -125,6 +125,10 @@ SELECT is(
  * that error in pg_get_object_address().
  */
 SELECT CASE
+  WHEN pg_temp.major() < 905 THEN
+    pass(
+      format( 'check addressability for object type %L', object_type )
+    )
   WHEN cat_tools.object__is_address_unsupported(object_type) THEN
     throws_ok(
        format(
@@ -133,11 +137,7 @@ SELECT CASE
       )
       , '22023'
       , format( 'unsupported object type "%s"', object_type )
-      , format( 'object type %L correctly marked as not addressable', object_type )
-    )
-  WHEN NOT is_real THEN -- Assume not real objects would still be addressible...
-    pass(
-      format( 'object type %L does not throw not addressable error', object_type )
+      , format( 'check addressability for object type %L', object_type )
     )
   ELSE
     pg_temp.throws_other(
@@ -145,8 +145,8 @@ SELECT CASE
         $$pg_get_object_address(%L,array[''],array[''])$$
         , object_type
       )
-      , ''
-      , format( 'object type %L does not throw not addressable error', object_type )
+      , '22023'
+      , format( 'check addressability for object type %L', object_type )
     )
   END
   FROM obj_type
