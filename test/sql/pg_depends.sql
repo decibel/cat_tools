@@ -20,6 +20,22 @@ CREATE TEMP VIEW func_calls AS
 GRANT SELECT ON func_calls TO public;
 */
 
+/*
+ * The pg_depends tests are problematic, because bag_eq creates temp objects,
+ * which then do not show up in pg_dep or the view. So we need to capture what
+ * things look like before actually running the test. The same problem exists
+ * with creating 2 separate views; first we have to create the views, then
+ * insert the data into them.
+ */
+SELECT CASE
+WHEN pg_temp.major() >= 903 THEN pg_temp.exec($exec$
+  CREATE TEMP TABLE pg_dep AS SELECT * FROM pg_depend WHERE false;
+  CREATE TEMP TABLE pg_dep_v AS SELECT * FROM pg_dep;
+  INSERT INTO pg_dep_v SELECT classid, objid, objsubid, refclassid, refobjid, refobjsubid, deptype FROM _cat_tools.pg_depend_identity_v;
+  INSERT INTO pg_dep SELECT * FROM pg_depend;
+$exec$)
+END;
+
 SELECT plan(
   0
   -- Perms
@@ -42,22 +58,18 @@ SELECT plan(
 \set s _cat_tools
 \set n pg_depend_identity_v
 
-/*
- * This test is problematic, because bag_eq creates temp objects, which then do
- * not show up in pg_dep or the view. So we need to capture what things look
- * like before actually running the test. The same problem exists with creating
-.* 2 separate views; first we have to create the views, then insert the data
- * into them.
- */
-CREATE TEMP TABLE pg_dep AS SELECT * FROM pg_depend WHERE false;
-CREATE TEMP TABLE pg_dep_v AS SELECT * FROM pg_dep;
-INSERT INTO pg_dep_v SELECT classid, objid, objsubid, refclassid, refobjid, refobjsubid, deptype FROM :s.:n;
-INSERT INTO pg_dep SELECT * FROM pg_depend;
-SELECT bag_eq(
-  $$SELECT * FROM pg_dep_v$$
-  , $$SELECT * FROM pg_dep$$
-  , format('Verify base data on ', :'s', :'n')
-);
+SELECT CASE
+  WHEN pg_temp.major() < 903 THEN
+    pass(
+      format('Verify base data on ', :'s', :'n')
+    )
+  ELSE
+    bag_eq(
+      $$SELECT * FROM pg_dep_v$$
+      , $$SELECT * FROM pg_dep$$
+      , format('Verify base data on ', :'s', :'n')
+    )
+END;
 
 /*
  * END tests to run as owner
@@ -65,7 +77,13 @@ SELECT bag_eq(
 
 SET LOCAL ROLE :no_use_role;
 
-SELECT throws_ok(
+SELECT CASE
+  WHEN pg_temp.major() < 903 THEN
+    pass(
+      'Verify public has no perms'
+    )
+  ELSE
+    throws_ok(
       format(
         $$SELECT * FROM %I.%I$$
         , view_schema, view_name
@@ -74,6 +92,7 @@ SELECT throws_ok(
       , NULL
       , 'Verify public has no perms'
     )
+  END
   FROM views
 ;
 

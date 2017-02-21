@@ -1,5 +1,7 @@
 B = sql
 
+testdeps: $(wildcard test/*.sql test/helpers/*.sql) # Be careful not to include directories in this
+
 include pgxntool/base.mk
 
 LT95		 = $(call test, $(MAJORVER), -lt, 95)

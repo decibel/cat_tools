@@ -588,31 +588,31 @@ SELECT __cat_tools.create_function(
 
 @generated@
 
-CREATE OR REPLACE VIEW _cat_tools.pg_depend_identity_v AS
-  SELECT o.type AS object_type
-      , o.schema AS object_schema
-      , o.name AS object_name
-      , o.identity AS object_identity
-      , r.type AS reference_type
-      , r.schema AS reference_schema
-      , r.name AS reference_name
-      , r.identity AS reference_identity
-      , d.*
-    FROM pg_catalog.pg_depend d
-      , pg_catalog.pg_identify_object(classid, objid, objsubid) o
-      , pg_catalog.pg_identify_object(refclassid, refobjid, refobjsubid) r
-    WHERE classid <> 0
-  UNION ALL
-  SELECT NULL, NULL, NULL, NULL
-      , r.type AS reference_type
-      , r.schema AS reference_schema
-      , r.name AS reference_name
-      , r.identity AS reference_identity
-      , d.*
-    FROM pg_catalog.pg_depend d
-      , pg_catalog.pg_identify_object(refclassid, refobjid, refobjsubid) r
-    WHERE classid = 0
-;
+CREATE OR REPLACE VIEW _cat_tools.pg_depend_identity_v AS -- SED: REQUIRES 9.3!
+  SELECT o.type AS object_type -- SED: REQUIRES 9.3!
+      , o.schema AS object_schema -- SED: REQUIRES 9.3!
+      , o.name AS object_name -- SED: REQUIRES 9.3!
+      , o.identity AS object_identity -- SED: REQUIRES 9.3!
+      , r.type AS reference_type -- SED: REQUIRES 9.3!
+      , r.schema AS reference_schema -- SED: REQUIRES 9.3!
+      , r.name AS reference_name -- SED: REQUIRES 9.3!
+      , r.identity AS reference_identity -- SED: REQUIRES 9.3!
+      , d.* -- SED: REQUIRES 9.3!
+    FROM pg_catalog.pg_depend d -- SED: REQUIRES 9.3!
+      , pg_catalog.pg_identify_object(classid, objid, objsubid) o -- SED: REQUIRES 9.3!
+      , pg_catalog.pg_identify_object(refclassid, refobjid, refobjsubid) r -- SED: REQUIRES 9.3!
+    WHERE classid <> 0 -- SED: REQUIRES 9.3!
+  UNION ALL -- SED: REQUIRES 9.3!
+  SELECT NULL, NULL, NULL, NULL -- SED: REQUIRES 9.3!
+      , r.type AS reference_type -- SED: REQUIRES 9.3!
+      , r.schema AS reference_schema -- SED: REQUIRES 9.3!
+      , r.name AS reference_name -- SED: REQUIRES 9.3!
+      , r.identity AS reference_identity -- SED: REQUIRES 9.3!
+      , d.* -- SED: REQUIRES 9.3!
+    FROM pg_catalog.pg_depend d -- SED: REQUIRES 9.3!
+      , pg_catalog.pg_identify_object(refclassid, refobjid, refobjsubid) r -- SED: REQUIRES 9.3!
+    WHERE classid = 0 -- SED: REQUIRES 9.3!
+; -- SED: REQUIRES 9.3!
 
 @generated@
 

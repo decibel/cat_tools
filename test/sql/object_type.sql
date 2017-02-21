@@ -5,10 +5,6 @@
 -- test_role is set in test/deps.sql
 
 SET LOCAL ROLE :use_role;
-CREATE FUNCTION pg_temp.major()
-RETURNS int LANGUAGE sql IMMUTABLE AS $$
-SELECT current_setting('server_version_num')::int/100
-$$;
 
 CREATE FUNCTION pg_temp.extra_types()
 RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
