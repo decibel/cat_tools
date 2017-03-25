@@ -1,6 +1,7 @@
 \set ECHO none
 
 \i test/pgxntool/psql.sql
+\t
 
 BEGIN;
 CREATE SCHEMA cat_tools;
