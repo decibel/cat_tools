@@ -15,6 +15,20 @@ $$;
  * "temporary" schema instead.
  */
 CREATE SCHEMA __cat_tools;
+
+-- Schema already created via CREATE EXTENSION
+GRANT USAGE ON SCHEMA cat_tools TO cat_tools__usage;
+CREATE SCHEMA _cat_tools;
+
+CREATE OR REPLACE VIEW _cat_tools.pg_class_v AS
+  SELECT c.oid AS reloid, c.*, n.nspname AS relschema
+    FROM pg_class c
+      LEFT JOIN pg_namespace n ON( n.oid = c.relnamespace )
+;
+REVOKE ALL ON _cat_tools.pg_class_v FROM public;
+
+@generated@
+
 CREATE FUNCTION __cat_tools.exec(
   sql text
 ) RETURNS void LANGUAGE plpgsql AS $body$
@@ -26,6 +40,14 @@ $body$;
 
 @generated@
 
+/*
+ * Temporary stub function. We do this so we can use the nice create_function
+ * function that we're about to create to create the real version of this
+ * function.
+ */
+CREATE FUNCTION cat_tools.function__arg_types_text(text
+) RETURNS text LANGUAGE sql AS 'SELECT $1';
+
 CREATE FUNCTION __cat_tools.create_function(
   function_name text
   , args text
@@ -35,6 +57,7 @@ CREATE FUNCTION __cat_tools.create_function(
   , comment text DEFAULT NULL
 ) RETURNS void LANGUAGE plpgsql AS $body$
 DECLARE
+  c_simple_args CONSTANT text := cat_tools.function__arg_types_text(args);
 
   create_template CONSTANT text := $template$
 CREATE OR REPLACE FUNCTION %s(
@@ -79,7 +102,7 @@ BEGIN
   PERFORM __cat_tools.exec( format(
       revoke_template
       , function_name
-      , args
+      , c_simple_args
     ) )
   ;
 
@@ -87,7 +110,7 @@ BEGIN
     PERFORM __cat_tools.exec( format(
         grant_template
         , function_name
-        , args
+        , c_simple_args
         , grants
       ) )
     ;
@@ -97,7 +120,7 @@ BEGIN
     PERFORM __cat_tools.exec( format(
         comment_template
         , function_name
-        , args
+        , c_simple_args
         , comment
       ) )
     ;
@@ -107,16 +130,107 @@ $body$;
 
 @generated@
 
--- Schema already created via CREATE EXTENSION
-GRANT USAGE ON SCHEMA cat_tools TO cat_tools__usage;
-CREATE SCHEMA _cat_tools;
+SELECT __cat_tools.create_function(
+  'cat_tools.function__arg_types'
+  , $$arguments text$$
+  , $$pg_catalog.regtype[] LANGUAGE plpgsql$$
+  , $body$
+DECLARE
+  input_arg_types pg_catalog.regtype[];
 
-CREATE OR REPLACE VIEW _cat_tools.pg_class_v AS
-  SELECT c.oid AS reloid, c.*, n.nspname AS relschema
-    FROM pg_class c
-      LEFT JOIN pg_namespace n ON( n.oid = c.relnamespace )
-;
-REVOKE ALL ON _cat_tools.pg_class_v FROM public;
+  c_template CONSTANT text := $fmt$CREATE FUNCTION pg_temp.cat_tools__function__arg_types__temp_function(
+    %s
+  ) RETURNS %s LANGUAGE plpgsql AS 'BEGIN NULL; END'
+  $fmt$;
+
+  temp_proc pg_catalog.regprocedure;
+  sql text;
+BEGIN
+  sql := format(
+    c_template
+    , arguments
+    , 'void'
+  );
+  --RAISE DEBUG 'Executing SQL %', sql;
+  DECLARE
+    v_type pg_catalog.regtype;
+  BEGIN
+    EXECUTE sql;
+  EXCEPTION WHEN invalid_function_definition THEN
+    v_type := (regexp_matches( SQLERRM, 'function result type must be ([^ ]+) because of' ))[1];
+    sql := format(
+      c_template
+      , arguments
+      , v_type
+    );
+    EXECUTE sql;
+  END;
+
+  /*
+   * Get new OID. *This must be done dynamically!* Otherwise we get stuck
+   * with a CONST oid after first compilation. The regproc cast ensures there's
+   * only one function with this name. The cast to regprocedure is for the sake
+   * of the DROP down below.
+   */
+  EXECUTE $$SELECT 'pg_temp.cat_tools__function__arg_types__temp_function'::pg_catalog.regproc::pg_catalog.regprocedure$$ INTO temp_proc;
+  SELECT INTO STRICT input_arg_types
+      -- This is here to re-cast the array as 1-based instead of 0 based (better solutions welcome!)
+      string_to_array(proargtypes::text,' ')::pg_catalog.regtype[]
+    FROM pg_proc
+    WHERE oid = temp_proc
+  ;
+  -- NOTE: DROP may not accept all the argument options that CREATE does, so use temp_proc
+  EXECUTE format(
+    $fmt$DROP FUNCTION %s$fmt$
+    , temp_proc
+  );
+
+  RETURN input_arg_types;
+END
+$body$
+  , 'cat_tools__usage'
+  , 'Returns argument types for a function argument body as an array. Unlike a
+  normal regprocedure cast, this function accepts anything that is valid when
+  defining a function.'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.function__arg_types_text'
+  , $$arguments text$$
+  , $$text LANGUAGE sql$$
+  , $body$
+SELECT array_to_string(cat_tools.function__arg_types($1), ', ')
+$body$
+  , 'cat_tools__usage'
+  , 'Returns argument types for a function argument body as text. Unlike a
+  normal regprocedure cast, this function accepts anything that is valid when
+  defining a function.'
+
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.regprocedure'
+  , $$
+  function_name text
+  , arguments text$$
+  , $$pg_catalog.regprocedure LANGUAGE sql$$
+  , $body$
+SELECT format(
+  '%s(%s)'
+  , $1
+  , cat_tools.function__arg_types_text($2)
+)::pg_catalog.regprocedure
+$body$
+  , 'cat_tools__usage'
+  , 'Returns a regprocedure for a given function name and arguments. Unlike a
+  normal regprocedure cast, arguments can contain anything that is valid when
+  defining a function.'
+);
+
 
 @generated@
 
@@ -905,110 +1019,6 @@ BEGIN
 END
 $body$
   , 'cat_tools__usage'
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.function__arg_types'
-  , $$arguments text$$
-  , $$pg_catalog.regtype[] LANGUAGE plpgsql$$
-  , $body$
-DECLARE
-  input_arg_types pg_catalog.regtype[];
-
-  c_template CONSTANT text := $fmt$CREATE FUNCTION pg_temp.cat_tools__function__arg_types__temp_function(
-    %s
-  ) RETURNS %s LANGUAGE plpgsql AS 'BEGIN NULL; END'
-  $fmt$;
-
-  temp_proc pg_catalog.regprocedure;
-  sql text;
-BEGIN
-  sql := format(
-    c_template
-    , arguments
-    , 'void'
-  );
-  --RAISE DEBUG 'Executing SQL %', sql;
-  DECLARE
-    v_type pg_catalog.regtype;
-  BEGIN
-    EXECUTE sql;
-  EXCEPTION WHEN invalid_function_definition THEN
-    v_type := (regexp_matches( SQLERRM, 'function result type must be ([^ ]+) because of' ))[1];
-    sql := format(
-      c_template
-      , arguments
-      , v_type
-    );
-    EXECUTE sql;
-  END;
-
-  /*
-   * Get new OID. *This must be done dynamically!* Otherwise we get stuck
-   * with a CONST oid after first compilation. The regproc cast ensures there's
-   * only one function with this name. The cast to regprocedure is for the sake
-   * of the DROP down below.
-   */
-  EXECUTE $$SELECT 'pg_temp.cat_tools__function__arg_types__temp_function'::pg_catalog.regproc::pg_catalog.regprocedure$$ INTO temp_proc;
-  SELECT INTO STRICT input_arg_types
-      -- This is here to re-cast the array as 1-based instead of 0 based (better solutions welcome!)
-      string_to_array(proargtypes::text,' ')::pg_catalog.regtype[]
-    FROM pg_proc
-    WHERE oid = temp_proc
-  ;
-  -- NOTE: DROP may not accept all the argument options that CREATE does, so use temp_proc
-  EXECUTE format(
-    $fmt$DROP FUNCTION %s$fmt$
-    , temp_proc
-  );
-
-  RETURN input_arg_types;
-END
-$body$
-  , 'cat_tools__usage'
-  , 'Returns argument types for a function argument body as an array. Unlike a
-  normal regprocedure cast, this function accepts anything that is valid when
-  defining a function.'
-
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.function__arg_types_text'
-  , $$arguments text$$
-  , $$text LANGUAGE sql$$
-  , $body$
-SELECT array_to_string(cat_tools.function__arg_types($1), ', ')
-$body$
-  , 'cat_tools__usage'
-  , 'Returns argument types for a function argument body as text. Unlike a
-  normal regprocedure cast, this function accepts anything that is valid when
-  defining a function.'
-
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.regprocedure'
-  , $$
-  function_name text
-  , arguments text$$
-  , $$pg_catalog.regprocedure LANGUAGE sql$$
-  , $body$
-SELECT format(
-  '%s(%s)'
-  , $1
-  , cat_tools.function__arg_types_text($2)
-)::pg_catalog.regprocedure
-$body$
-  , 'cat_tools__usage'
-  , 'Returns a regprocedure for a given function name and arguments. Unlike a
-  normal regprocedure cast, arguments can contain anything that is valid when
-  defining a function.'
 );
 
 @generated@
