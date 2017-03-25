@@ -1,0 +1,53 @@
+\set ECHO none
+1..50
+ok 1 - Permission denied trying to use cat_tools.currval()
+ok 2 - Permission denied trying to use cat_tools.setval()
+ok 3 - Permission denied trying to use cat_tools.nextval()
+ok 4 - Permission denied trying to use cat_tools.sequence__next()
+ok 5 - Permission denied trying to use cat_tools.sequence__last()
+ok 6 - Permission denied trying to use cat_tools.sequence__set_next()
+ok 7 - Permission denied trying to use cat_tools.sequence__set_last()
+ok 8 - Function cat_tools.currval() should return bigint
+ok 9 - Function cat_tools.setval() should return bigint
+ok 10 - Function cat_tools.nextval() should return bigint
+ok 11 - Function cat_tools.sequence__next() should return bigint
+ok 12 - Function cat_tools.sequence__last() should return bigint
+ok 13 - Function cat_tools.sequence__set_next() should return bigint
+ok 14 - Function cat_tools.sequence__set_last() should return bigint
+ok 15 - Function cat_tools.currval() should be VOLATILE
+ok 16 - Function cat_tools.setval() should be VOLATILE
+ok 17 - Function cat_tools.nextval() should be VOLATILE
+ok 18 - Function cat_tools.sequence__next() should be VOLATILE
+ok 19 - Function cat_tools.sequence__last() should be VOLATILE
+ok 20 - Function cat_tools.sequence__set_next() should be VOLATILE
+ok 21 - Function cat_tools.sequence__set_last() should be VOLATILE
+ok 22 - Function cat_tools.currval() should not be strict
+ok 23 - Function cat_tools.setval() should not be strict
+ok 24 - Function cat_tools.nextval() should not be strict
+ok 25 - Function cat_tools.sequence__next() should not be strict
+ok 26 - Function cat_tools.sequence__last() should not be strict
+ok 27 - Function cat_tools.sequence__set_next() should not be strict
+ok 28 - Function cat_tools.sequence__set_last() should not be strict
+ok 29 - Function cat_tools.currval() should not be security definer
+ok 30 - Function cat_tools.setval() should not be security definer
+ok 31 - Function cat_tools.nextval() should not be security definer
+ok 32 - Function cat_tools.sequence__next() should not be security definer
+ok 33 - Function cat_tools.sequence__last() should not be security definer
+ok 34 - Function cat_tools.sequence__set_next() should not be security definer
+ok 35 - Function cat_tools.sequence__set_last() should not be security definer
+ok 36 - Call on unset sequence throws error
+ok 37 - Call on unset sequence throws error
+ok 38 - nextval returns correct value
+ok 39 - sequence__next returns correct value
+ok 40 - setval returns correct value
+ok 41 - sequence__next returns correct value
+ok 42 - setval returns correct value
+ok 43 - sequence__next returns correct value
+ok 44 - sequence__set_last returns correct value
+ok 45 - sequence__next returns correct value
+ok 46 - sequence__set_next returns correct value
+ok 47 - sequence__next returns correct value
+ok 48 - INSERT INTO seqtest VALUES(default)
+ok 49 - currval
+ok 50 - currval
+# TRANSACTION INTENTIONALLY LEFT OPEN!

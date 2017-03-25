@@ -1,3 +1,5 @@
+@generated@
+
 SET LOCAL client_min_messages = WARNING;
 
 DO $$
@@ -908,12 +910,12 @@ $body$
 @generated@
 
 SELECT __cat_tools.create_function(
-  'cat_tools.currval'
+  'cat_tools.get_serial_sequence'
   , $$
   table_name text
   , column_name text
 $$
-  , $$bigint LANGUAGE plpgsql$$
+  , $$pg_catalog.regclass LANGUAGE plpgsql$$
   , $body$
 DECLARE
   seq pg_catalog.regclass;
@@ -929,10 +931,101 @@ BEGIN
     ;
   END IF;
 
-  RETURN currval(seq);
+  RETURN seq;
 END
 $body$
   , 'cat_tools__usage'
+  , 'Return sequence that is associated with a column. Unlike the pg_get_serial_sequence, throw an exception if there is no sequence associated with the column.'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.sequence__last'
+  , $$
+  table_name text
+  , column_name text
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT pg_catalog.currval(cat_tools.get_serial_sequence($1,$2))'
+  , 'cat_tools__usage'
+  , 'Return the last value assigned to a column with an associated sequence.'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.currval'
+  , $$
+  table_name text
+  , column_name text
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT cat_tools.sequence__last($1,$2)'
+  , 'cat_tools__usage'
+  , 'Return the last value assigned to a column with an associated sequence.'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.sequence__next'
+  , $$
+  table_name text
+  , column_name text
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT pg_catalog.nextval(cat_tools.get_serial_sequence($1,$2))'
+  , 'cat_tools__usage'
+  , 'Return the next value to assign to a column with an associated sequence. THIS ADVANCES THE SEQUENCE.'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.nextval'
+  , $$
+  table_name text
+  , column_name text
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT cat_tools.sequence__next($1,$2)'
+  , 'cat_tools__usage'
+  , 'Return the next value to assign to a column with an associated sequence. THIS ADVANCES THE SEQUENCE.'
+);
+
+@generated@
+
+SELECT __cat_tools.create_function(
+  'cat_tools.setval'
+  , $$
+  table_name text
+  , column_name text
+  , new_value bigint
+  , has_been_used boolean DEFAULT true
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT pg_catalog.setval(cat_tools.get_serial_sequence($1,$2), $3, $4)'
+  , 'cat_tools__usage'
+  , 'Changes the value for a sequence associated with a column. If has_been_used is true, the sequence will be set to new_value + 1. Returns new_value. See also sequence__set_last() and sequence__set_next().'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.sequence__set_last'
+  , $$
+  table_name text
+  , column_name text
+  , last_value bigint
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT cat_tools.setval($1,$2,$3,true)'
+  , 'cat_tools__usage'
+  , 'Changes the value for a sequence associated with a column. last_value is the last value used, so sequence is set to last_value+1. See also sequence__set_next().'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.sequence__set_next'
+  , $$
+  table_name text
+  , column_name text
+  , next_value bigint
+$$
+  , $$bigint LANGUAGE sql$$
+  , 'SELECT cat_tools.setval($1,$2,$3,false)'
+  , 'cat_tools__usage'
+  , 'Changes the value for a sequence associated with a column. next_value is the next value the sequence will assign. See also sequence__last_value.'
 );
 
 @generated@
