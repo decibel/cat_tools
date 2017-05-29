@@ -137,4 +137,4 @@ SELECT is(
 
 \i test/pgxntool/finish.sql
 
--- vi: expandtab ts=2 sw=2::bigint
+-- vi: expandtab ts=2 sw=2
