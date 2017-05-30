@@ -1,14 +1,4 @@
-@generated@
-
-SET LOCAL client_min_messages = WARNING;
-
-DO $$
-BEGIN
-  CREATE ROLE cat_tools__usage NOLOGIN;
-EXCEPTION WHEN duplicate_object THEN
-  NULL;
-END
-$$;
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 /*
  * NOTE: All pg_temp objects must be dropped at the end of the script!
@@ -18,18 +8,7 @@ $$;
  */
 CREATE SCHEMA __cat_tools;
 
--- Schema already created via CREATE EXTENSION
-GRANT USAGE ON SCHEMA cat_tools TO cat_tools__usage;
-CREATE SCHEMA _cat_tools;
-
-CREATE OR REPLACE VIEW _cat_tools.pg_class_v AS
-  SELECT c.oid AS reloid, c.*, n.nspname AS relschema
-    FROM pg_class c
-      LEFT JOIN pg_namespace n ON( n.oid = c.relnamespace )
-;
-REVOKE ALL ON _cat_tools.pg_class_v FROM public;
-
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 CREATE FUNCTION __cat_tools.exec(
   sql text
@@ -40,15 +19,7 @@ BEGIN
 END
 $body$;
 
-@generated@
-
-/*
- * Temporary stub function. We do this so we can use the nice create_function
- * function that we're about to create to create the real version of this
- * function.
- */
-CREATE FUNCTION cat_tools.function__arg_types_text(text
-) RETURNS text LANGUAGE sql AS 'SELECT $1';
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 CREATE FUNCTION __cat_tools.create_function(
   function_name text
@@ -90,7 +61,7 @@ COMMENT ON FUNCTION %s(
 $template$
   ;
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 BEGIN
   PERFORM __cat_tools.exec( format(
@@ -130,7 +101,39 @@ BEGIN
 END
 $body$;
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+/*
+ * UPGRADE STARTS HERE
+ */
+SELECT __cat_tools.create_function(
+  'cat_tools.pg_attribute__get'
+  , $$
+  relation pg_catalog.regclass
+  , column_name name
+$$
+  , $$pg_catalog.pg_attribute LANGUAGE plpgsql$$
+  , $body$
+DECLARE
+  r pg_catalog.pg_attribute;
+BEGIN
+  SELECT INTO STRICT r
+      *
+    FROM pg_catalog.pg_attribute
+    WHERE attrelid = relation
+      AND attname = column_name
+  ;
+  RETURN r;
+EXCEPTION WHEN no_data_found THEN
+  RAISE 'column "%" of relation "%" does not exist', column_name, relation
+    USING ERRCODE = 'undefined_column'
+  ;
+END
+$body$
+  , 'cat_tools__usage'
+);
+
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.function__arg_types'
@@ -196,7 +199,7 @@ $body$
   defining a function.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.function__arg_types_text'
@@ -212,7 +215,7 @@ $body$
 
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.regprocedure'
@@ -234,17 +237,25 @@ $body$
 );
 
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
+DO $$BEGIN
 CREATE TYPE cat_tools.constraint_type AS ENUM(
   'domain constraint', 'table constraint'
 );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END$$;
 COMMENT ON TYPE cat_tools.constraint_type IS $$Descriptive names for every type of Postgres object (table, operator, rule, etc)$$;
+
+DO $$BEGIN
 CREATE TYPE cat_tools.procedure_type AS ENUM(
   'aggregate', 'function'
 );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END$$;
 COMMENT ON TYPE cat_tools.procedure_type IS $$Types of constraints (`domain constraint` or `table_constraint`)$$;
 
+DO $$BEGIN
 CREATE TYPE cat_tools.relation_type AS ENUM(
   'table'
   , 'index'
@@ -255,8 +266,11 @@ CREATE TYPE cat_tools.relation_type AS ENUM(
   , 'composite type'
   , 'foreign table'
 );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END$$;
 COMMENT ON TYPE cat_tools.relation_type IS $$Types of objects stored in `pg_class`$$;
 
+/*
 CREATE TYPE cat_tools.relation_relkind AS ENUM(
   'r'
   , 'i'
@@ -268,9 +282,11 @@ CREATE TYPE cat_tools.relation_relkind AS ENUM(
   , 'm'
 );
 COMMENT ON TYPE cat_tools.relation_relkind IS $$Valid values for `pg_class.relkind`$$;
+*/
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
+DO $$BEGIN
 CREATE TYPE cat_tools.object_type AS ENUM(
   -- pg_class
   'table'
@@ -331,8 +347,10 @@ CREATE TYPE cat_tools.object_type AS ENUM(
   , 'transform' -- SED: REQUIRES 9.5!
   , 'access method' -- pg_am
 );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END$$;
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.objects__shared'
@@ -375,7 +393,7 @@ $body$
   , 'Returns true if object_type is a shared object.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.objects__address_unsupported'
@@ -401,7 +419,7 @@ $body$
   , 'cat_tools__usage'
   , 'Returns set of object types not supported by pg_get_object_address().'
 );
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 SELECT __cat_tools.create_function(
   'cat_tools.object__is_address_unsupported'
   , 'object_type cat_tools.object_type'
@@ -423,7 +441,7 @@ $body$
   , 'Returns true if object type is not supported by pg_get_object_address().'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
@@ -480,7 +498,7 @@ $body$
   , 'cat_tools__usage'
   , 'Returns catalog table that is used to store <object_type> objects'
 );
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 SELECT __cat_tools.create_function(
   'cat_tools.object__catalog'
   , 'object_type text'
@@ -490,7 +508,7 @@ SELECT __cat_tools.create_function(
   , 'Returns catalog table that is used to store <object_type> objects'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.object__address_classid'
@@ -515,8 +533,9 @@ SELECT __cat_tools.create_function(
   , 'Returns the classid used by the pg_*_object*() functions for an object_type'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
+DO $$BEGIN
 CREATE TABLE _cat_tools.catalog_metadata(
   object_catalog    pg_catalog.regclass
     CONSTRAINT catalog_metadata__pk_object_catalog PRIMARY KEY
@@ -524,7 +543,42 @@ CREATE TABLE _cat_tools.catalog_metadata(
   , reg_type        pg_catalog.regtype
   , simple_reg_type pg_catalog.regtype
 );
--- Table is populated later, after enum_range_srf is created
+INSERT INTO _cat_tools.catalog_metadata(object_catalog, reg_type, namespace_field)
+SELECT object__catalog
+    , CASE object__catalog
+      WHEN 'pg_catalog.pg_class'::pg_catalog.regclass THEN 'pg_catalog.regclass'
+      WHEN 'pg_catalog.pg_ts_config'::pg_catalog.regclass THEN 'pg_catalog.regconfig'
+      WHEN 'pg_catalog.pg_ts_dict'::pg_catalog.regclass THEN 'pg_catalog.regdictionary'
+      WHEN 'pg_catalog.pg_namespace'::pg_catalog.regclass THEN 'pg_catalog.regnamespace' -- SED: REQUIRES 9.5!
+      WHEN 'pg_catalog.pg_operator'::pg_catalog.regclass THEN 'pg_catalog.regoperator'
+      WHEN 'pg_catalog.pg_proc'::pg_catalog.regclass THEN 'pg_catalog.regprocedure'
+      WHEN 'pg_catalog.pg_authid'::pg_catalog.regclass THEN 'pg_catalog.regrole' -- SED: REQUIRES 9.5!
+      WHEN 'pg_catalog.pg_type'::pg_catalog.regclass THEN 'pg_catalog.regtype'
+    END::pg_catalog.regtype
+    , n.attname
+  FROM (
+    SELECT DISTINCT cat_tools.object__catalog(object_type)
+      FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
+    ) d
+    LEFT JOIN cat_tools.column n
+      ON n.attrelid = object__catalog
+      AND n.attname ~ 'namespace$'
+      AND atttypid = 'oid'::pg_catalog.regtype
+;
+UPDATE _cat_tools.catalog_metadata
+  SET simple_reg_type = 'pg_catalog.regproc'
+  WHERE object_catalog = 'pg_catalog.pg_proc'::pg_catalog.regclass
+;
+UPDATE _cat_tools.catalog_metadata
+  SET simple_reg_type = 'pg_catalog.regoper'
+  WHERE object_catalog = 'pg_catalog.pg_operator'::pg_catalog.regclass
+;
+-- Cluster to get rid of dead rows
+CLUSTER _cat_tools.catalog_metadata USING catalog_metadata__pk_object_catalog;
+EXCEPTION WHEN duplicate_table THEN NULL;
+END$$;
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
 SELECT __cat_tools.create_function(
   '_cat_tools.catalog_metadata__get'
   , 'object_catalog _cat_tools.catalog_metadata.object_catalog%TYPE'
@@ -544,7 +598,7 @@ $body$
   , 'cat_tools__usage'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.object__reg_type'
@@ -573,7 +627,7 @@ SELECT __cat_tools.create_function(
   , 'Returns the object identifier type (ie: regclass) associated with a system catalog (ie: pg_class).'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.object__reg_type_catalog'
@@ -594,7 +648,7 @@ EXCEPTION WHEN no_data_found THEN
   IF object_identifier_type::text LIKE 'reg%' THEN
     RAISE 'object identifier type % is not supported', object_identifier_type
       USING
-        HINT = format( 'If %I is a valid object identifier type please open an issue on github.', object_identifier_type )
+        HINT = format( 'If %I is a valid object identifier type please open an issue at https://github.com/decibel/cat_tools/issues.', object_identifier_type )
         , ERRCODE = 'feature_not_supported'
     ;
   ELSE
@@ -610,8 +664,10 @@ $body$
   , 'Returns the system catalog that stores a particular object identifier type.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
+DROP FUNCTION cat_tools.relation__kind(cat_tools.relation_relkind);
+DROP FUNCTION cat_tools.relation__kind(text);
 SELECT __cat_tools.create_function(
   'cat_tools.relation__kind'
   , 'relkind cat_tools.relation_relkind'
@@ -652,7 +708,7 @@ $body$
   , 'Mapping from <cat_tools.relation_type> to a <pg_class.relkind> value'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.relation__relkind'
@@ -671,7 +727,7 @@ SELECT __cat_tools.create_function(
   , 'Mapping from <cat_tools.relation_type> to a <pg_class.relkind> value'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 CREATE OR REPLACE VIEW _cat_tools.pg_depend_identity_v AS -- SED: REQUIRES 9.3!
   SELECT o.type AS object_type -- SED: REQUIRES 9.3!
@@ -699,216 +755,112 @@ CREATE OR REPLACE VIEW _cat_tools.pg_depend_identity_v AS -- SED: REQUIRES 9.3!
     WHERE classid = 0 -- SED: REQUIRES 9.3!
 ; -- SED: REQUIRES 9.3!
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
-CREATE OR REPLACE VIEW cat_tools.pg_class_v AS
-  SELECT *
-    FROM _cat_tools.pg_class_v
 
-    /*
-     * Oddly, there's no security associated with schema or table visibility.
-     * Be a bit paranoid though.
-     */
-    WHERE NOT pg_is_other_temp_schema(relnamespace)
-      AND relkind IN( 'r', 'v', 'f' )
+CREATE OR REPLACE VIEW cat_tools.pg_extension_v AS
+  SELECT e.oid, e.*
+
+      , extnamespace::regnamespace AS extschema -- SED: REQUIRES 9.5!
+-- Not used prior to 9.5:       , nspname AS extschema 
+
+      , extconfig::pg_catalog.regclass[] AS ext_config_tables
+    FROM pg_catalog.pg_extension e
+      LEFT JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace
 ;
-GRANT SELECT ON cat_tools.pg_class_v TO cat_tools__usage;
+GRANT SELECT ON cat_tools.pg_extension_v TO cat_tools__usage;
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
-CREATE OR REPLACE VIEW _cat_tools.pg_attribute_v AS
-  SELECT a.*
-      , c.*
-      , t.oid AS typoid
-      , t.*
-    FROM pg_attribute a
-      LEFT JOIN _cat_tools.pg_class_v c ON ( c.reloid = a.attrelid )
-      LEFT JOIN pg_type t ON ( t.oid = a.atttypid )
-;
-REVOKE ALL ON _cat_tools.pg_attribute_v FROM public;
-
-CREATE OR REPLACE VIEW _cat_tools.column AS
-  SELECT *
-    , pg_catalog.format_type(typoid, atttypmod) AS column_type
-    , CASE typtype
-        -- domain
-        WHEN 'd' THEN pg_catalog.format_type(typbasetype, typtypmod)
-        -- enum
-        WHEN 'e' THEN 'text'
-        ELSE pg_catalog.format_type(typoid, atttypmod)
-      END AS base_type
-    , pk.conkey AS pk_columns
-    , ARRAY[attnum] <@ pk.conkey AS is_pk_member
-    , (SELECT pg_catalog.pg_get_expr(d.adbin, d.adrelid)
-          FROM pg_catalog.pg_attrdef d
-          WHERE d.adrelid = a.attrelid
-            AND d.adnum = a.attnum
-            AND a.atthasdef
-        ) AS column_default
-    FROM _cat_tools.pg_attribute_v a
-      LEFT JOIN pg_constraint pk
-        ON ( reloid = pk.conrelid )
-          AND pk.contype = 'p'
-;
-REVOKE ALL ON _cat_tools.column FROM public;
-
-@generated@
-
-CREATE OR REPLACE VIEW cat_tools.column AS
-  SELECT *
-    FROM _cat_tools.column
-    -- SECURITY
-    WHERE NOT pg_is_other_temp_schema(relnamespace)
-      AND attnum > 0
-      AND NOT attisdropped
-      AND relkind IN( 'r', 'v', 'f' )
-      AND (
-        pg_has_role(SESSION_USER, relowner, 'USAGE'::text)
-        OR has_column_privilege(SESSION_USER, reloid, attnum, 'SELECT, INSERT, UPDATE, REFERENCES'::text)
-      )
-    ORDER BY relschema, relname, attnum
-;
-GRANT SELECT ON cat_tools.column TO cat_tools__usage;
-
--- Borrowed from newsysviews: http://pgfoundry.org/projects/newsysviews/
+/*
+ * EXTENSION FUNCTIONS
+ */
 SELECT __cat_tools.create_function(
-  '_cat_tools._pg_sv_column_array'
-  , 'OID, SMALLINT[]'
-  , 'NAME[] LANGUAGE sql STABLE'
-  , $$
-    SELECT ARRAY(
-        SELECT a.attname
-          FROM pg_catalog.pg_attribute a
-          JOIN generate_series(1, array_upper($2, 1)) s(i) ON a.attnum = $2[i]
-         WHERE attrelid = $1
-         ORDER BY i
-    )
-$$
-);
-
-@generated@
-
--- Borrowed from newsysviews: http://pgfoundry.org/projects/newsysviews/
-SELECT __cat_tools.create_function(
-  '_cat_tools._pg_sv_table_accessible'
-  , 'OID, OID'
-  , 'boolean LANGUAGE sql STABLE'
-  , $$
-    SELECT CASE WHEN has_schema_privilege($1, 'USAGE') THEN (
-                  has_table_privilege($2, 'SELECT')
-               OR has_table_privilege($2, 'INSERT')
-               or has_table_privilege($2, 'UPDATE')
-               OR has_table_privilege($2, 'DELETE')
-               OR has_table_privilege($2, 'RULE')
-               OR has_table_privilege($2, 'REFERENCES')
-               OR has_table_privilege($2, 'TRIGGER')
-           ) ELSE FALSE
-    END;
-$$
-);
-
-@generated@
-
--- Borrowed from newsysviews: http://pgfoundry.org/projects/newsysviews/
-CREATE OR REPLACE VIEW cat_tools.pg_all_foreign_keys
-AS
-  SELECT n1.nspname                                   AS fk_schema_name,
-         c1.relname                                   AS fk_table_name,
-         k1.conname                                   AS fk_constraint_name,
-         c1.oid                                       AS fk_table_oid,
-         _cat_tools._pg_sv_column_array(k1.conrelid,k1.conkey)   AS fk_columns,
-         n2.nspname                                   AS pk_schema_name,
-         c2.relname                                   AS pk_table_name,
-         k2.conname                                   AS pk_constraint_name,
-         c2.oid                                       AS pk_table_oid,
-         ci.relname                                   AS pk_index_name,
-         _cat_tools._pg_sv_column_array(k1.confrelid,k1.confkey) AS pk_columns,
-         CASE k1.confmatchtype WHEN 'f' THEN 'FULL'
-                               WHEN 'p' THEN 'PARTIAL'
-                               WHEN 'u' THEN 'NONE'
-                               else null
-         END AS match_type,
-         CASE k1.confdeltype WHEN 'a' THEN 'NO ACTION'  -- @generated@
-                             WHEN 'c' THEN 'CASCADE'
-                             WHEN 'd' THEN 'SET DEFAULT'
-                             WHEN 'n' THEN 'SET NULL'
-                             WHEN 'r' THEN 'RESTRICT'
-                             else null
-         END AS on_delete,
-         CASE k1.confupdtype WHEN 'a' THEN 'NO ACTION'
-                             WHEN 'c' THEN 'CASCADE'
-                             WHEN 'd' THEN 'SET DEFAULT'
-                             WHEN 'n' THEN 'SET NULL'
-                             WHEN 'r' THEN 'RESTRICT'
-                             ELSE NULL
-         END AS on_update,
-         k1.condeferrable AS is_deferrable,             -- @generated@
-         k1.condeferred   AS is_deferred
-    FROM pg_catalog.pg_constraint k1
-    JOIN pg_catalog.pg_namespace n1 ON (n1.oid = k1.connamespace)
-    JOIN pg_catalog.pg_class c1     ON (c1.oid = k1.conrelid)
-    JOIN pg_catalog.pg_class c2     ON (c2.oid = k1.confrelid)
-    JOIN pg_catalog.pg_namespace n2 ON (n2.oid = c2.relnamespace)
-    JOIN pg_catalog.pg_depend d     ON (
-                 d.classid = 'pg_constraint'::pg_catalog.regclass  -- @generated@
-             AND d.objid = k1.oid
-             AND d.objsubid = 0
-             AND d.deptype = 'n'
-             AND d.refclassid = 'pg_class'::pg_catalog.regclass
-             AND d.refobjsubid=0
-         )
-    JOIN pg_catalog.pg_class ci ON (ci.oid = d.refobjid AND ci.relkind = 'i')
-    LEFT JOIN pg_depend d2      ON (
-                 d2.classid = 'pg_class'::pg_catalog.regclass      -- @generated@
-             AND d2.objid = ci.oid
-             AND d2.objsubid = 0
-             AND d2.deptype = 'i'
-             AND d2.refclassid = 'pg_constraint'::pg_catalog.regclass
-             AND d2.refobjsubid = 0
-         )
-    LEFT JOIN pg_catalog.pg_constraint k2 ON (          -- @generated@
-                 k2.oid = d2.refobjid
-             AND k2.contype IN ('p', 'u')
-         )
-   WHERE k1.conrelid != 0
-     AND k1.confrelid != 0
-     AND k1.contype = 'f'
-     AND _cat_tools._pg_sv_table_accessible(n1.oid, c1.oid)
-;
-GRANT SELECT ON cat_tools.pg_all_foreign_keys TO cat_tools__usage;
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.pg_attribute__get'
-  , $$
-  relation pg_catalog.regclass
-  , column_name name
-$$
-  , $$pg_catalog.pg_attribute LANGUAGE plpgsql$$
+  'cat_tools.pg_extension__get'
+  , 'extension_name name'
+  , $$cat_tools.pg_extension_v LANGUAGE plpgsql$$
   , $body$
 DECLARE
-  r pg_catalog.pg_attribute;
+  r cat_tools.pg_extension_v;
 BEGIN
   SELECT INTO STRICT r
       *
-    FROM pg_catalog.pg_attribute
-    WHERE attrelid = relation
-      AND attname = column_name
+    FROM cat_tools.pg_extension_v
+    WHERE extname = extension_name
   ;
   RETURN r;
 EXCEPTION WHEN no_data_found THEN
-  RAISE 'column "%" of relation "%" does not exist', column_name, relation
-    USING ERRCODE = 'undefined_column'
+  RAISE 'extension "%" does not exist', extension_name
+    USING ERRCODE = 'undefined_object'
   ;
 END
 $body$
   , 'cat_tools__usage'
 );
+SELECT __cat_tools.create_function(
+  'cat_tools.extension__schemas'
+  , 'extension_names name[]'
+  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
+-- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+  , $body$
+SELECT array(
+  SELECT (cat_tools.pg_extension__get(en)).extschema
+    FROM unnest(extension_names) en
+)
+$body$
+  , 'cat_tools__usage'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.extension__schemas_unique'
+  , 'extension_names name[]'
+  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
+-- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+  , $body$
+SELECT array(
+  SELECT DISTINCT (cat_tools.pg_extension__get(en)).extschema
+    FROM unnest(extension_names) en
+)
+$body$
+  , 'cat_tools__usage'
+);
 
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
-@generated@
+-- Text versions
+SELECT __cat_tools.create_function(
+  'cat_tools.extension__schemas'
+  , 'extension_names text'
+  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
+-- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+  , $body$
+SELECT cat_tools.extension__schemas(
+  CASE WHEN extension_names LIKE '{%}' THEN extension_names
+  ELSE '{' || extension_names || '}'
+  END::name[]
+)
+$body$
+  , 'cat_tools__usage'
+);
+SELECT __cat_tools.create_function(
+  'cat_tools.extension__schemas_unique'
+  , 'extension_names text'
+  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
+-- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+  , $body$
+SELECT cat_tools.extension__schemas_unique(
+  CASE WHEN extension_names LIKE '{%}' THEN extension_names
+  ELSE '{' || extension_names || '}'
+  END::name[]
+)
+$body$
+  , 'cat_tools__usage'
+);
 
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+/*
+ * SEQUENCE FUNCTIONS
+ */
 SELECT __cat_tools.create_function(
   'cat_tools.get_serial_sequence'
   , $$
@@ -938,7 +890,7 @@ $body$
   , 'Return sequence that is associated with a column. Unlike the pg_get_serial_sequence, throw an exception if there is no sequence associated with the column.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.sequence__last'
@@ -963,7 +915,7 @@ $$
   , 'Return the last value assigned to a column with an associated sequence.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.sequence__next'
@@ -988,7 +940,7 @@ $$
   , 'Return the next value to assign to a column with an associated sequence. THIS ADVANCES THE SEQUENCE.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
 SELECT __cat_tools.create_function(
   'cat_tools.setval'
@@ -1028,241 +980,8 @@ $$
   , 'Changes the value for a sequence associated with a column. next_value is the next value the sequence will assign. See also sequence__last_value.'
 );
 
-@generated@
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
-SELECT __cat_tools.create_function(
-  'cat_tools.enum_range'
-  , 'enum pg_catalog.regtype'
-  , $$text[] LANGUAGE plpgsql STABLE$$
-  , $body$
-DECLARE
-  ret text[];
-BEGIN
-  EXECUTE format('SELECT pg_catalog.enum_range( NULL::%s )', enum) INTO ret;
-  RETURN ret;
-END
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.enum_range_srf'
-  , 'enum pg_catalog.regtype'
-  , $$SETOF text LANGUAGE sql$$
-  , $body$
-SELECT * FROM unnest( cat_tools.enum_range($1) ) AS r(enum_label)
-$body$
-  , 'cat_tools__usage'
-);
-
-SELECT __cat_tools.create_function(
-  'cat_tools.pg_class'
-  , 'rel pg_catalog.regclass'
-  , $$cat_tools.pg_class_v LANGUAGE sql STABLE$$
-  , $body$
-SELECT * FROM cat_tools.pg_class_v WHERE reloid = $1
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.name__check'
-  , 'name_to_check text'
-  , $$void LANGUAGE plpgsql$$
-  , $body$
-BEGIN
-  IF name_to_check IS DISTINCT FROM name_to_check::name THEN
-    RAISE '"%" becomes "%" when cast to name', name_to_check, name_to_check::name;
-  END IF;
-END
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.trigger__parse'
-  , $$
-  trigger_oid oid
-  , OUT timing text
-  , OUT events text[]
-  , OUT defer text
-  , OUT row_statement text
-  , OUT when_clause text
-  , OUT function_arguments text
-$$
-  , $$record LANGUAGE plpgsql$$
-  , $body$
-DECLARE
-  r_trigger pg_catalog.pg_trigger;
-  v_triggerdef text;
-  v_create_stanza text;
-  v_on_clause text;
-  v_execute_clause text;
-
-  v_work text;
-  v_array text[];
-BEGIN
-  -- Do this first to make sure trigger exists
-  v_triggerdef := pg_catalog.pg_get_triggerdef(trigger_oid, true);
-  SELECT * INTO STRICT r_trigger FROM pg_catalog.pg_trigger WHERE oid = trigger_oid;
-
-  v_create_stanza := format(
-    'CREATE %sTRIGGER %I '
-    , CASE WHEN r_trigger.tgconstraint=0 THEN '' ELSE 'CONSTRAINT ' END
-    , r_trigger.tgname
-  );
-  -- Strip CREATE [CONSTRAINT] TRIGGER ... off
-  v_work := replace( v_triggerdef, v_create_stanza, '' );
-
-  -- Get BEFORE | AFTER | INSTEAD OF
-  timing := split_part( v_work, ' ', 1 );
-  timing := timing || CASE timing WHEN 'INSTEAD' THEN ' OF' ELSE '' END;
-
-  -- Strip off timing clause
-  v_work := replace( v_work, timing || ' ', '' );
-
-  -- Get array of events (INSERT, UPDATE [OF column, column], DELETE, TRUNCATE)
-  v_on_clause := ' ON ' || r_trigger.tgrelid::pg_catalog.regclass || ' ';
-  v_array := regexp_split_to_array( v_work, v_on_clause );
-  events := string_to_array( v_array[1], ' OR ' );
-  -- Get everything after ON table_name
-  v_work := v_array[2];
-  RAISE DEBUG 'v_work "%"', v_work;
-
-  -- Strip off FROM referenced_table if we have it
-  IF r_trigger.tgconstrrelid<>0 THEN
-    v_work := replace(
-      v_work
-      , 'FROM ' || r_trigger.tgconstrrelid::pg_catalog.regclass || ' '
-      , ''
-    );
-  END IF;
-  RAISE DEBUG 'v_work "%"', v_work;
-
-  -- Get function arguments
-  v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::pg_catalog.regproc || E'\\(';
-  v_array := regexp_split_to_array( v_work, v_execute_clause );
-  function_arguments := rtrim( v_array[2], ')' ); -- Yank trailing )
-  -- Get everything prior to EXECUTE PROCEDURE ...
-  v_work := v_array[1];
-  RAISE DEBUG 'v_work "%"', v_work;
-
-  row_statement := (regexp_matches( v_work, 'FOR EACH (ROW|STATEMENT)' ))[1];
-
-  -- Get [ NOT DEFERRABLE | [ DEFERRABLE ] { INITIALLY IMMEDIATE | INITIALLY DEFERRED } ]
-  v_array := regexp_split_to_array( v_work, 'FOR EACH (ROW|STATEMENT)' );
-  RAISE DEBUG 'v_work = "%", v_array = "%"', v_work, v_array;
-  defer := rtrim(v_array[1]);
-
-  IF r_trigger.tgqual IS NOT NULL THEN
-    when_clause := rtrim(
-      (regexp_split_to_array( v_array[2], E' WHEN \\(' ))[2]
-      , ')'
-    );
-  END IF;
-
-  RAISE DEBUG
-$$v_create_stanza = "%"
-  v_on_clause = "%"
-  v_execute_clause = "%"$$
-    , v_create_stanza
-    , v_on_clause
-    , v_execute_clause
-  ;
-
-  RETURN;
-END
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.trigger__get_oid__loose'
-  , $$
-  trigger_table pg_catalog.regclass
-  , trigger_name text
-$$
-  , $$oid LANGUAGE sql$$
-  , $body$
-  SELECT oid
-    FROM pg_trigger
-    WHERE tgrelid = $1 --trigger_table
-      AND tgname = $2 --trigger_name
-  ;
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
-SELECT __cat_tools.create_function(
-  'cat_tools.trigger__get_oid'
-  , $$
-  trigger_table pg_catalog.regclass
-  , trigger_name text
-$$
-  , $$oid LANGUAGE plpgsql$$
-  , $body$
-DECLARE
-  v_oid oid;
-BEGIN
-  -- Note that because __loose isn't an SRF it'll always return a value
-  v_oid := cat_tools.trigger__get_oid__loose( trigger_table, trigger_name ) ;
-
-  IF v_oid IS NULL THEN
-    RAISE EXCEPTION 'trigger % on table % does not exist', trigger_name, trigger_table;
-  END IF;
-
-  RETURN v_oid;
-END
-$body$
-  , 'cat_tools__usage'
-);
-
-@generated@
-
-INSERT INTO _cat_tools.catalog_metadata(object_catalog, reg_type, namespace_field)
-SELECT object__catalog
-    , CASE object__catalog
-      WHEN 'pg_catalog.pg_class'::pg_catalog.regclass THEN 'pg_catalog.regclass'
-      WHEN 'pg_catalog.pg_ts_config'::pg_catalog.regclass THEN 'pg_catalog.regconfig'
-      WHEN 'pg_catalog.pg_ts_dict'::pg_catalog.regclass THEN 'pg_catalog.regdictionary'
-      WHEN 'pg_catalog.pg_namespace'::pg_catalog.regclass THEN 'pg_catalog.regnamespace' -- SED: REQUIRES 9.5!
-      WHEN 'pg_catalog.pg_operator'::pg_catalog.regclass THEN 'pg_catalog.regoperator'
-      WHEN 'pg_catalog.pg_proc'::pg_catalog.regclass THEN 'pg_catalog.regprocedure'
-      WHEN 'pg_catalog.pg_authid'::pg_catalog.regclass THEN 'pg_catalog.regrole' -- SED: REQUIRES 9.5!
-      WHEN 'pg_catalog.pg_type'::pg_catalog.regclass THEN 'pg_catalog.regtype'
-    END::pg_catalog.regtype
-    , n.attname
-  FROM (
-    SELECT DISTINCT cat_tools.object__catalog(object_type)
-      FROM cat_tools.enum_range_srf('cat_tools.object_type') r(object_type)
-    ) d
-    LEFT JOIN cat_tools.column n
-      ON n.attrelid = object__catalog
-      AND n.attname ~ 'namespace$'
-      AND atttypid = 'oid'::pg_catalog.regtype
-;
-UPDATE _cat_tools.catalog_metadata
-  SET simple_reg_type = 'pg_catalog.regproc'
-  WHERE object_catalog = 'pg_catalog.pg_proc'::pg_catalog.regclass
-;
-UPDATE _cat_tools.catalog_metadata
-  SET simple_reg_type = 'pg_catalog.regoper'
-  WHERE object_catalog = 'pg_catalog.pg_operator'::pg_catalog.regclass
-;
--- Cluster to get rid of dead rows
-CLUSTER _cat_tools.catalog_metadata USING catalog_metadata__pk_object_catalog;
-
-@generated@
 
 /*
  * Drop "temporary" objects
@@ -1281,3 +1000,4 @@ DROP FUNCTION __cat_tools.create_function(
 DROP SCHEMA __cat_tools;
 
 -- vi: expandtab ts=2 sw=2
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
