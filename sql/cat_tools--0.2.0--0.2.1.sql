@@ -982,6 +982,236 @@ $$
 
 -- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
 
+/*
+ * Trigger functions
+ */
+DROP FUNCTION trigger__parse(oid);
+SELECT __cat_tools.create_function(
+  'cat_tools.trigger__get_oid__loose'
+  , $$
+  trigger_table pg_catalog.regclass
+  , trigger_name text
+$$
+  , $$oid LANGUAGE sql$$
+  , $body$
+  SELECT oid
+    FROM pg_trigger
+    WHERE tgrelid = $1 --trigger_table
+      AND tgname = CASE
+        /*
+         * tgname isn't quoted, so strip quotes, but only if the string both
+         * starts and ends with quotes
+         */
+        WHEN $2 LIKE '"%"' THEN btrim($2, '"')
+        ELSE $2
+        END --trigger_name
+  ;
+$body$
+  , 'cat_tools__usage'
+  , 'Return the OID for a trigger. Returns NULL if trigger does not exist.'
+);
+
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+SELECT __cat_tools.create_function(
+  'cat_tools.trigger__get_oid'
+  , $$
+  trigger_table pg_catalog.regclass
+  , trigger_name text
+$$
+  , $$oid LANGUAGE plpgsql$$
+  , $body$
+DECLARE
+  v_oid oid;
+BEGIN
+  -- Note that because __loose isn't an SRF it'll always return a value
+  v_oid := cat_tools.trigger__get_oid__loose( trigger_table, trigger_name ) ;
+
+  IF v_oid IS NULL THEN
+    RAISE EXCEPTION 'trigger % on table % does not exist', trigger_name, trigger_table
+      USING errcode = 'undefined_object' -- 42704
+    ;
+  END IF;
+
+  RETURN v_oid;
+END
+$body$
+  , 'cat_tools__usage'
+  , 'Return the OID for a trigger. Throws an undefined_object error if the trigger does not exist.'
+);
+
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+SELECT __cat_tools.create_function(
+  'cat_tools.trigger__parse'
+  , $$
+  trigger_oid oid
+  , OUT trigger_table regclass
+  , OUT timing text
+  , OUT events text[]
+  , OUT defer text
+  , OUT row_statement text
+  , OUT when_clause text
+  , OUT trigger_function regprocedure
+  , OUT function_arguments text[]
+$$
+  , $$record STABLE LANGUAGE plpgsql$$
+  , $body$
+DECLARE
+  r_trigger pg_catalog.pg_trigger;
+  v_triggerdef text;
+  v_create_stanza text;
+  v_on_clause text;
+  v_execute_clause text;
+
+  v_work text;
+  v_array text[];
+BEGIN
+  -- Do this first to make sure trigger exists
+  v_triggerdef := pg_catalog.pg_get_triggerdef(trigger_oid, true);
+  IF v_triggerdef IS NULL THEN
+    RAISE EXCEPTION 'trigger with OID % does not exist', trigger_oid
+      USING errcode = 'undefined_object' -- 42704
+    ;
+  END IF;
+
+  SELECT * INTO STRICT r_trigger FROM pg_catalog.pg_trigger WHERE oid = trigger_oid;
+  trigger_table := r_trigger.tgrelid;
+  trigger_function := r_trigger.tgfoid;
+
+  v_create_stanza := format(
+    'CREATE %sTRIGGER %I '
+    , CASE WHEN r_trigger.tgconstraint=0 THEN '' ELSE 'CONSTRAINT ' END
+    , r_trigger.tgname
+  );
+  -- Strip CREATE [CONSTRAINT] TRIGGER ... off
+  v_work := replace( v_triggerdef, v_create_stanza, '' );
+
+  -- Get BEFORE | AFTER | INSTEAD OF
+  timing := split_part( v_work, ' ', 1 );
+  timing := timing || CASE timing WHEN 'INSTEAD' THEN ' OF' ELSE '' END;
+
+  -- Strip off timing clause
+  v_work := replace( v_work, timing || ' ', '' );
+
+  -- Get array of events (INSERT, UPDATE [OF column, column], DELETE, TRUNCATE)
+  v_on_clause := ' ON ' || r_trigger.tgrelid::pg_catalog.regclass || ' ';
+  v_array := regexp_split_to_array( v_work, v_on_clause );
+  events := string_to_array( v_array[1], ' OR ' );
+  -- Get everything after ON table_name
+  v_work := v_array[2];
+  RAISE DEBUG 'v_work "%"', v_work;
+
+  -- Strip off FROM referenced_table if we have it
+  IF r_trigger.tgconstrrelid<>0 THEN
+    v_work := replace(
+      v_work
+      , 'FROM ' || r_trigger.tgconstrrelid::pg_catalog.regclass || ' '
+      , ''
+    );
+  END IF;
+  RAISE DEBUG 'v_work "%"', v_work;
+
+  -- Get function arguments
+  v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::pg_catalog.regproc || E'\\(';
+  v_array := regexp_split_to_array( v_work, v_execute_clause );
+  EXECUTE format(
+      'SELECT array[ %s ]'
+      , rtrim( v_array[2], ')' ) -- Yank trailing )
+    )
+    INTO function_arguments
+  ;
+  RAISE DEBUG 'v_array[2] "%"', v_array[2];
+  -- Get everything prior to EXECUTE PROCEDURE ...
+  v_work := v_array[1];
+  RAISE DEBUG 'v_work "%"', v_work;
+
+  row_statement := (regexp_matches( v_work, 'FOR EACH (ROW|STATEMENT)' ))[1];
+
+  -- Get [ NOT DEFERRABLE | [ DEFERRABLE ] { INITIALLY IMMEDIATE | INITIALLY DEFERRED } ]
+  v_array := regexp_split_to_array( v_work, 'FOR EACH (ROW|STATEMENT)' );
+  RAISE DEBUG 'v_work = "%", v_array = "%"', v_work, v_array;
+  defer := rtrim(v_array[1]);
+
+  IF r_trigger.tgqual IS NOT NULL THEN
+    when_clause := rtrim(
+      (regexp_split_to_array( v_array[2], E' WHEN \\(' ))[2]
+      , ')'
+    );
+  END IF;
+
+  RAISE DEBUG
+$$v_create_stanza = "%"
+  v_on_clause = "%"
+  v_execute_clause = "%"$$
+    , v_create_stanza
+    , v_on_clause
+    , v_execute_clause
+  ;
+
+  RETURN;
+END
+$body$
+  , 'cat_tools__usage'
+  , 'Provide details about a trigger.'
+);
+
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+SELECT __cat_tools.create_function(
+  'cat_tools.trigger__parse'
+  , $$
+  trigger_table pg_catalog.regclass
+  , trigger_name text
+  , OUT timing text
+  , OUT events text[]
+  , OUT defer text
+  , OUT row_statement text
+  , OUT when_clause text
+  , OUT trigger_function regprocedure
+  , OUT function_arguments text[]
+$$
+  , $$record STABLE LANGUAGE sql$$
+  -- s/, OUT \(\w*\).*/  , \1/
+  , $body$
+SELECT
+    timing
+    , events
+    , "defer"
+    , row_statement
+    , when_clause
+    , trigger_function
+    , function_arguments
+  FROM cat_tools.trigger__parse(
+    cat_tools.trigger__get_oid(trigger_table, trigger_name)
+  )
+$body$
+  , 'cat_tools__usage'
+  , 'Provide details about a trigger.'
+);
+
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+SELECT __cat_tools.create_function(
+  'cat_tools.trigger__args_as_text'
+  , $$function_arguments text[]$$
+  , $$text IMMUTABLE STRICT LANGUAGE sql$$
+  , $body$
+  SELECT format(
+    $$'%s'$$
+    , array_to_string(
+      function_arguments
+      , $$', '$$
+    )
+  )
+$body$
+  , 'cat_tools__usage'
+  , 'Convert function_arguments as returned by trigger__parse() to text (for backwards compatibility).'
+);
+
+-- GENERATED FILE! DO NOT EDIT! See sql/cat_tools--0.2.0--0.2.1.sql.in
+
+
 
 /*
  * Drop "temporary" objects
