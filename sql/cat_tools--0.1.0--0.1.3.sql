@@ -196,13 +196,11 @@ SELECT pg_temp.create_function(
   'cat_tools.trigger__parse'
   , $$
   trigger_oid oid
-  , OUT trigger_table regclass
   , OUT timing text
   , OUT events text[]
   , OUT defer text
   , OUT row_statement text
   , OUT when_clause text
-  , OUT trigger_function regprocedure
   , OUT function_arguments text
 $$
   , $$record LANGUAGE plpgsql$$
@@ -220,8 +218,6 @@ BEGIN
   -- Do this first to make sure trigger exists
   v_triggerdef := pg_catalog.pg_get_triggerdef(trigger_oid, true);
   SELECT * INTO STRICT r_trigger FROM pg_catalog.pg_trigger WHERE oid = trigger_oid;
-  trigger_table := r_trigger.tgrelid;
-  trigger_function := r_trigger.tgfoid;
 
   v_create_stanza := format(
     'CREATE %sTRIGGER %I '
