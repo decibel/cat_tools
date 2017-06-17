@@ -46,6 +46,7 @@ git add META.json
 mkdir -p sql test src
 
 cd test
+mkdir -p sql
 safecp ../pgxntool/test/deps.sql deps.sql
 [ -d pgxntool ] || ln -s ../pgxntool/test/pgxntool .
 git add pgxntool
