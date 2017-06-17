@@ -6,7 +6,7 @@ ok 3 - Verify public has no perms
 ok 4 - loose returns NULL for missing trigger
 ok 5 - cat_tools.trigger__get_oid( '"test table"', '"test trigger"' ) throws correct error for missing trigger
 ok 6 - cat_tools.trigger__parse( '"test table"', '"test trigger"' ) throws correct error for missing trigger
-ok 7 - trigger__parse( oid ) throws correct error for missing trigger
+ok 7 - SELECT cat_tools.trigger__parse( 1259 ) throws correct error for missing trigger
 ok 8 - verify results of trigger__parse(oid)
 ok 9 - verify results of trigger__parse(regclass,text)
 ok 10 - verify trigger__args_as_text()

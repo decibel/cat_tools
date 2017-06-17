@@ -63,13 +63,18 @@ SELECT throws_ok(
 ;
 SELECT throws_ok(
   format(
-    $$SELECT %I.%I( %L )$$
+    $$SELECT %I.%I( %s )$$
     , :'s', 'trigger__parse'
     , 'pg_class'::regclass::oid -- OID that's guaranteed not to be a trigger
   )
   , '42704'
   , 'trigger with OID ' || 'pg_class'::regclass::oid || ' does not exist'
-  , 'trigger__parse( oid ) throws correct error for missing trigger'
+  , format(
+    $$SELECT %I.%I( %s )$$
+    , :'s', 'trigger__parse'
+    , 'pg_class'::regclass::oid -- OID that's guaranteed not to be a trigger
+  )
+    || ' throws correct error for missing trigger'
 );
 
 CREATE FUNCTION pg_temp.tg(

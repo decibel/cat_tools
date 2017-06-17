@@ -1067,15 +1067,19 @@ DECLARE
   v_work text;
   v_array text[];
 BEGIN
-  -- Do this first to make sure trigger exists
-  v_triggerdef := pg_catalog.pg_get_triggerdef(trigger_oid, true);
-  IF v_triggerdef IS NULL THEN
+  /*
+   * Do this first to make sure trigger exists.
+   *
+   * TODO: After we no longer support < 9.6, test v_triggerdef for NULL instead
+   * using the extra block here.
+   */
+  BEGIN
+    SELECT * INTO STRICT r_trigger FROM pg_catalog.pg_trigger WHERE oid = trigger_oid;
+  EXCEPTION WHEN no_data_found THEN
     RAISE EXCEPTION 'trigger with OID % does not exist', trigger_oid
       USING errcode = 'undefined_object' -- 42704
     ;
-  END IF;
-
-  SELECT * INTO STRICT r_trigger FROM pg_catalog.pg_trigger WHERE oid = trigger_oid;
+  END;
   trigger_table := r_trigger.tgrelid;
   trigger_function := r_trigger.tgfoid;
 
