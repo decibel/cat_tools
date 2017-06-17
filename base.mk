@@ -77,8 +77,12 @@ installcheck: $(TEST_RESULT_FILES) $(TEST_OUT_FILES) $(TEST_SQL_FILES) $(TEST_SO
 
 # make test: run any test dependencies, then do a `make install installcheck`.
 # If regressions are found, it will output them.
+#
+# This used to depend on clean as well, but that causes problems with
+# watch-make if you're generating intermediate files. If tests end up needing
+# clean it's an indication of a missing dependency anyway.
 .PHONY: test
-test: clean testdeps install installcheck
+test: testdeps install installcheck
 	@if [ -r $(TESTOUT)/regression.diffs ]; then cat $(TESTOUT)/regression.diffs; fi
 
 # make results: runs `make test` and copy all result files to expected
@@ -220,6 +224,6 @@ installcheck: pgtap
 pgtap: $(DESTDIR)$(datadir)/extension/pgtap.control
 
 $(DESTDIR)$(datadir)/extension/pgtap.control:
-	pgxn install pgtap
+	pgxn install pgtap --sudo
 
 endif # fndef PGXNTOOL_NO_PGXS_INCLUDE
