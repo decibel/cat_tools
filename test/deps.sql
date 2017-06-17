@@ -5,7 +5,7 @@ SET client_min_messages = WARNING;
 -- Note: pgTap is loaded by setup.sql
 --CREATE EXTENSION IF NOT EXISTS ...;
 
-\i test/loaders/active.sql
+\i test/.build/active.sql
 
 -- Used by several unit tests
 \set no_use_role cat_tools_testing__no_use_role
