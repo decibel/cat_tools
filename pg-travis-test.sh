@@ -24,6 +24,6 @@ sudo easy_install pgxnclient
 PGPORT=55435 
 sudo pg_createcluster --start $PGVERSION test -p $PGPORT -- -A trust
 # TODO: have base.mk support dynamic sudo
-sudo PGPORT=$PGPORT PGUSER=postgres PG_CONFIG=/usr/lib/postgresql/$PGVERSION/bin/pg_config make test
+sudo PGPORT=$PGPORT PGUSER=postgres PG_CONFIG=/usr/lib/postgresql/$PGVERSION/bin/pg_config make ${TARGET:-test}
 
 [ ! -e test/regression.diffs ]

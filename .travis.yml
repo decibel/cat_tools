@@ -9,4 +9,11 @@ env:
   - PGVERSION=9.4
   - PGVERSION=9.3
   - PGVERSION=9.2
+
+  - PGVERSION=9.6 TARGET='set-test-upgrade test'
+  - PGVERSION=9.5 TARGET='set-test-upgrade test'
+  - PGVERSION=9.4 TARGET='set-test-upgrade test'
+  - PGVERSION=9.3 TARGET='set-test-upgrade test'
+  - PGVERSION=9.2 TARGET='set-test-upgrade test'
+
 script: bash ./pg-travis-test.sh

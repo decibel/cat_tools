@@ -16,6 +16,9 @@ meta.mk
 /sql/*--*
 !/sql/*--*--*.sql
 
+# test targets
+/test/.build/
+
 # Test artifacts
 results/
 regression.diffs

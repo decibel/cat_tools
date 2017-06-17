@@ -41,3 +41,44 @@ else
 endif
 	mv $@.tmp $@
 
+# Support for upgrade test
+TEST_BUILD_DIR = test/.build
+testdeps: $(TEST_BUILD_DIR)/dep.mk $(TEST_BUILD_DIR)/active.sql
+-include $(TEST_BUILD_DIR)/dep.mk
+
+# Ensure dep.mk exists.
+$(TEST_BUILD_DIR)/dep.mk: 
+	echo 'TEST_LOAD_SOURCE = new' > $(TEST_BUILD_DIR)/dep.mk
+
+.PHONY: set-test-new
+set-test-new: $(TEST_BUILD_DIR)/
+	echo 'TEST_LOAD_SOURCE = new' > $(TEST_BUILD_DIR)/dep.mk
+
+.PHONY: test-upgrade
+set-test-upgrade: $(TEST_BUILD_DIR)/
+	echo 'TEST_LOAD_SOURCE = upgrade' > $(TEST_BUILD_DIR)/dep.mk
+
+# Handle case when active.sql doesn't exist
+$(TEST_BUILD_DIR)/active.sql: $(TEST_BUILD_DIR)/dep.mk $(TEST_BUILD_DIR)/$(TEST_LOAD_SOURCE).sql 
+	ln -sf $(TEST_LOAD_SOURCE).sql $@
+
+$(TEST_BUILD_DIR)/upgrade.sql: test/load_upgrade.sql $(TEST_BUILD_DIR) old_version
+	(echo @generated@ && cat $< && echo @generated@) | sed -e 's#@generated@#-- GENERATED FILE! DO NOT EDIT! See $<#' > $@
+
+$(TEST_BUILD_DIR)/new.sql: test/load_new.sql $(TEST_BUILD_DIR)
+	(echo @generated@ && cat $< && echo @generated@) | sed -e 's#@generated@#-- GENERATED FILE! DO NOT EDIT! See $<#' > $@
+
+# TODO: figure out vpath
+EXTRA_CLEAN += $(TEST_BUILD_DIR)/
+$(TEST_BUILD_DIR):
+	[ -d $@ ] || mkdir -p $@
+
+.PHONY: old_version
+old_version: $(DESTDIR)$(datadir)/extension/cat_tools--0.2.0.sql
+$(DESTDIR)$(datadir)/extension/cat_tools--0.2.0.sql:
+	pgxn install --unstable 'cat_tools=0.2.0'
+
+
+.PHONY: clean_old_version
+clean_old_version:
+	pgxn uninstall --unstable 'cat_tools=0.2.0'
