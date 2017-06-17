@@ -42,6 +42,9 @@ endif
 	mv $@.tmp $@
 
 # Support for upgrade test
+#
+# TODO: Instead of all of this stuff figure out how to pass something to
+# pg_regress that will alter the behavior of the test instead.
 TEST_BUILD_DIR = test/.build
 testdeps: $(TEST_BUILD_DIR)/dep.mk $(TEST_BUILD_DIR)/active.sql
 -include $(TEST_BUILD_DIR)/dep.mk
