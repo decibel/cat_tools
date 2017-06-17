@@ -50,18 +50,18 @@ testdeps: $(TEST_BUILD_DIR)/dep.mk $(TEST_BUILD_DIR)/active.sql
 -include $(TEST_BUILD_DIR)/dep.mk
 
 # Ensure dep.mk exists.
-$(TEST_BUILD_DIR)/dep.mk: 
+$(TEST_BUILD_DIR)/dep.mk: $(TEST_BUILD_DIR)
 	echo 'TEST_LOAD_SOURCE = new' > $(TEST_BUILD_DIR)/dep.mk
 
 .PHONY: set-test-new
-set-test-new: $(TEST_BUILD_DIR)/
+set-test-new: $(TEST_BUILD_DIR)
 	echo 'TEST_LOAD_SOURCE = new' > $(TEST_BUILD_DIR)/dep.mk
 
 .PHONY: test-upgrade
-set-test-upgrade: $(TEST_BUILD_DIR)/
+set-test-upgrade: $(TEST_BUILD_DIR)
 	echo 'TEST_LOAD_SOURCE = upgrade' > $(TEST_BUILD_DIR)/dep.mk
 
-# Handle case when active.sql doesn't exist
+
 $(TEST_BUILD_DIR)/active.sql: $(TEST_BUILD_DIR)/dep.mk $(TEST_BUILD_DIR)/$(TEST_LOAD_SOURCE).sql 
 	ln -sf $(TEST_LOAD_SOURCE).sql $@
 
