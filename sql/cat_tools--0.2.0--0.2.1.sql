@@ -343,8 +343,8 @@ CREATE TYPE cat_tools.object_type AS ENUM(
   , 'default acl' -- pg_default_acl
   , 'extension'
   , 'event trigger' -- pg_event_trigger -- SED: REQUIRES 9.3!
-  , 'policy' -- SED: REQUIRES 9.5!
-  , 'transform' -- SED: REQUIRES 9.5!
+-- Requires 9.5:   , 'policy' 
+-- Requires 9.5:   , 'transform' 
   , 'access method' -- pg_am
 );
 EXCEPTION WHEN duplicate_object THEN NULL;
@@ -549,10 +549,10 @@ SELECT object__catalog
       WHEN 'pg_catalog.pg_class'::pg_catalog.regclass THEN 'pg_catalog.regclass'
       WHEN 'pg_catalog.pg_ts_config'::pg_catalog.regclass THEN 'pg_catalog.regconfig'
       WHEN 'pg_catalog.pg_ts_dict'::pg_catalog.regclass THEN 'pg_catalog.regdictionary'
-      WHEN 'pg_catalog.pg_namespace'::pg_catalog.regclass THEN 'pg_catalog.regnamespace' -- SED: REQUIRES 9.5!
+-- Requires 9.5:       WHEN 'pg_catalog.pg_namespace'::pg_catalog.regclass THEN 'pg_catalog.regnamespace' 
       WHEN 'pg_catalog.pg_operator'::pg_catalog.regclass THEN 'pg_catalog.regoperator'
       WHEN 'pg_catalog.pg_proc'::pg_catalog.regclass THEN 'pg_catalog.regprocedure'
-      WHEN 'pg_catalog.pg_authid'::pg_catalog.regclass THEN 'pg_catalog.regrole' -- SED: REQUIRES 9.5!
+-- Requires 9.5:       WHEN 'pg_catalog.pg_authid'::pg_catalog.regclass THEN 'pg_catalog.regrole' 
       WHEN 'pg_catalog.pg_type'::pg_catalog.regclass THEN 'pg_catalog.regtype'
     END::pg_catalog.regtype
     , n.attname
@@ -761,8 +761,8 @@ CREATE OR REPLACE VIEW _cat_tools.pg_depend_identity_v AS -- SED: REQUIRES 9.3!
 CREATE OR REPLACE VIEW cat_tools.pg_extension_v AS
   SELECT e.oid, e.*
 
-      , extnamespace::regnamespace AS extschema -- SED: REQUIRES 9.5!
--- Not used prior to 9.5:       , nspname AS extschema 
+-- Requires 9.5:       , extnamespace::regnamespace AS extschema 
+      , nspname AS extschema -- SED: PRIOR TO 9.5!
 
       , extconfig::pg_catalog.regclass[] AS ext_config_tables
     FROM pg_catalog.pg_extension e
@@ -800,8 +800,8 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.extension__schemas'
   , 'extension_names name[]'
-  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
--- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+-- Requires 9.5:   , $$pg_catalog.regnamespace[] LANGUAGE sql$$ 
+  , $$pg_catalog.name[] LANGUAGE sql$$ -- SED: PRIOR TO 9.5!
   , $body$
 SELECT array(
   SELECT (cat_tools.pg_extension__get(en)).extschema
@@ -813,8 +813,8 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.extension__schemas_unique'
   , 'extension_names name[]'
-  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
--- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+-- Requires 9.5:   , $$pg_catalog.regnamespace[] LANGUAGE sql$$ 
+  , $$pg_catalog.name[] LANGUAGE sql$$ -- SED: PRIOR TO 9.5!
   , $body$
 SELECT array(
   SELECT DISTINCT (cat_tools.pg_extension__get(en)).extschema
@@ -830,8 +830,8 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.extension__schemas'
   , 'extension_names text'
-  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
--- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+-- Requires 9.5:   , $$pg_catalog.regnamespace[] LANGUAGE sql$$ 
+  , $$pg_catalog.name[] LANGUAGE sql$$ -- SED: PRIOR TO 9.5!
   , $body$
 SELECT cat_tools.extension__schemas(
   CASE WHEN extension_names LIKE '{%}' THEN extension_names
@@ -844,8 +844,8 @@ $body$
 SELECT __cat_tools.create_function(
   'cat_tools.extension__schemas_unique'
   , 'extension_names text'
-  , $$pg_catalog.regnamespace[] LANGUAGE sql$$ -- SED: REQUIRES 9.5!
--- Not used prior to 9.5:   , $$pg_catalog.name[] LANGUAGE sql$$ 
+-- Requires 9.5:   , $$pg_catalog.regnamespace[] LANGUAGE sql$$ 
+  , $$pg_catalog.name[] LANGUAGE sql$$ -- SED: PRIOR TO 9.5!
   , $body$
 SELECT cat_tools.extension__schemas_unique(
   CASE WHEN extension_names LIKE '{%}' THEN extension_names

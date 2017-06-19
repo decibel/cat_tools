@@ -46,6 +46,7 @@ $body$;
 
 SELECT plan(
   0
+  + 2 -- extra_types sanity
   + 4 -- no_use tests
   + 1 -- definition
   + 3 * (SELECT count(*)::int FROM obj_type)
@@ -59,6 +60,20 @@ SELECT plan(
   + 3 * 2
 
   + 1 -- objects__shared
+);
+
+SELECT is(
+  array_upper(pg_temp.extra_types(),1)
+  , CASE
+    WHEN pg_temp.major() < 905 THEN 2
+    WHEN pg_temp.major() < 903 THEN 3
+  END
+  , 'sanity check size of pg_temp.extra_types()'
+);
+SELECT is(
+  (SELECT count(*)::int FROM obj_type)
+  , 51
+  , 'sanity check size of pg_temp.obj_type'
 );
 
 SET LOCAL ROLE :no_use_role;
