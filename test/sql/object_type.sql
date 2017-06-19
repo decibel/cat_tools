@@ -64,9 +64,9 @@ SELECT plan(
 
 SELECT is(
   array_upper(pg_temp.extra_types(),1)
-  , CASE
-    WHEN pg_temp.major() < 905 THEN 2
+  , CASE -- REMEMBER: first match wins, so must be ascending!
     WHEN pg_temp.major() < 903 THEN 3
+    WHEN pg_temp.major() < 905 THEN 2
   END
   , 'sanity check size of pg_temp.extra_types()'
 );
