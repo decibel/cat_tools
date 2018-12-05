@@ -39,7 +39,22 @@ SET LOCAL ROLE :use_role;
  * pg_attribute__get()
  */
 
-\set call 'SELECT * FROM %I.%I( %L, %L )'
+-- See definition of _cat_tools.pg_attribute_v for details
+SELECT 'SELECT ' || array_to_string(array(
+      SELECT
+          CASE attname
+            WHEN 'attmissingval' THEN 'attmissingval::text AS attmissingval_text'
+            ELSE attname
+          END
+        FROM pg_attribute
+        WHERE attrelid='pg_attribute'::regclass
+          AND attnum>=0
+        ORDER BY attnum
+    )
+    , ', '
+  ) AS attribute_select
+\gset
+\set call :attribute_select ' FROM %I.%I( %L, %L )'
 \set n pg_attribute__get
 SELECT throws_ok(
   format(
@@ -68,7 +83,7 @@ SELECT results_eq(
     , 'pg_catalog.pg_class'
     , 'relname'
   )
-  , $$SELECT * FROM pg_attribute WHERE attrelid = 'pg_class'::regclass AND attname='relname'$$
+  , :'attribute_select' || $$ FROM pg_attribute WHERE attrelid = 'pg_class'::regclass AND attname='relname'$$
   , 'Verify details of pg_class.relname'
 );
 SELECT results_eq(
@@ -77,7 +92,7 @@ SELECT results_eq(
     , 'pg_catalog.pg_tables'
     , 'tablename'
   )
-  , $$SELECT * FROM pg_attribute WHERE attrelid = 'pg_tables'::regclass AND attname='tablename'$$
+  , :'attribute_select' || $$ FROM pg_attribute WHERE attrelid = 'pg_tables'::regclass AND attname='tablename'$$
   , 'Verify details of pg_tables.tablename'
 );
 

@@ -717,8 +717,16 @@ GRANT SELECT ON cat_tools.pg_class_v TO cat_tools__usage;
 
 @generated@
 
+/*
+ * We can't have a field of type anyarray in a view, so we need to special-case
+ * pg_attribute.attmissingval. Instead of hard-coding that, dynamically
+ * generate list of fields from pg_attribute.
+ *
+ * WARNING: if you change this, make sure to visit test/attribute.sql as well!
+ */
+SELECT __cat_tools.exec( format( $fmt$
 CREATE OR REPLACE VIEW _cat_tools.pg_attribute_v AS
-  SELECT a.*
+  SELECT %s
       , c.*
       , t.oid AS typoid
       , t.*
@@ -726,6 +734,22 @@ CREATE OR REPLACE VIEW _cat_tools.pg_attribute_v AS
       LEFT JOIN _cat_tools.pg_class_v c ON ( c.reloid = a.attrelid )
       LEFT JOIN pg_type t ON ( t.oid = a.atttypid )
 ;
+$fmt$
+  , array_to_string(array(
+      SELECT
+          CASE attname
+            WHEN 'attmissingval' THEN 'attmissingval::text AS attmissingval_text'
+            ELSE attname
+          END
+        FROM pg_attribute
+        WHERE attrelid='pg_attribute'::regclass
+          AND attnum>=0
+        ORDER BY attnum
+    )
+    , ', '
+  )
+));
+
 REVOKE ALL ON _cat_tools.pg_attribute_v FROM public;
 
 CREATE OR REPLACE VIEW _cat_tools.column AS
