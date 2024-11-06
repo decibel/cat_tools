@@ -36,7 +36,7 @@ TEST_SQL_FILES		+= $(wildcard $(TESTDIR)/sql/*.sql)
 TEST_RESULT_FILES	 = $(patsubst $(TESTDIR)/sql/%.sql,$(TESTDIR)/expected/%.out,$(TEST_SQL_FILES))
 TEST_FILES	 = $(TEST_SOURCE_FILES) $(TEST_SQL_FILES)
 REGRESS		 = $(sort $(notdir $(subst .source,,$(TEST_FILES:.sql=)))) # Sort is to get unique list
-REGRESS_OPTS = --inputdir=$(TESTDIR) --outputdir=$(TESTOUT) --load-language=plpgsql
+REGRESS_OPTS = --inputdir=$(TESTDIR) --outputdir=$(TESTOUT) # See additional setup below
 MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
 ifeq ($(strip $(MODULES)),)
 MODULES =# Set to NUL so PGXS doesn't puke
@@ -57,8 +57,10 @@ GE91		 = $(call test, $(MAJORVER), -ge, 91)
 
 ifeq ($(GE91),yes)
 all: $(EXTENSION_VERSION_FILES)
+endif
 
-#DATA = $(wildcard sql/*--*.sql)
+ifeq ($($call test, $(MAJORVER), -lt 13), yes)
+	REGRESS_OPTS += --load-language=plpgsql
 endif
 
 PGXS := $(shell $(PG_CONFIG) --pgxs)
