@@ -22,14 +22,6 @@ CREATE SCHEMA __cat_tools;
 GRANT USAGE ON SCHEMA cat_tools TO cat_tools__usage;
 CREATE SCHEMA _cat_tools;
 
--- No permissions checks
-CREATE OR REPLACE VIEW _cat_tools.pg_class_v AS
-  SELECT c.oid AS reloid, c.*, n.nspname AS relschema
-    FROM pg_class c
-      LEFT JOIN pg_namespace n ON( n.oid = c.relnamespace )
-;
-REVOKE ALL ON _cat_tools.pg_class_v FROM public;
-
 @generated@
 
 CREATE FUNCTION __cat_tools.exec(
@@ -41,7 +33,43 @@ BEGIN
 END
 $body$;
 
+-- See also test/setup.sql
+CREATE FUNCTION __cat_tools.omit_column(
+  rel text
+  , omit name[] DEFAULT array['oid']
+) RETURNS text LANGUAGE sql IMMUTABLE AS $body$
+SELECT array_to_string(array(
+    SELECT attname
+      FROM pg_attribute a
+      WHERE attrelid = rel::regclass
+        AND NOT attisdropped
+        AND attnum >= 0
+        AND attname != ANY( omit )
+      ORDER BY attnum
+    )
+  , ', '
+)
+$body$;
+
 @generated@
+
+/*
+ * Starting in 12 oid columns in catalog tables are no longer hidden, so we
+ * need a way to include all the fields in a table *except* for the OID column.
+ */
+SELECT __cat_tools.exec(format($fmt$
+CREATE OR REPLACE VIEW _cat_tools.pg_class_v AS
+  SELECT c.oid AS reloid
+      , %s
+      , n.nspname AS relschema
+    FROM pg_class c
+      LEFT JOIN pg_namespace n ON( n.oid = c.relnamespace )
+;
+$fmt$
+  , __cat_tools.omit_column('pg_catalog.pg_class')
+));
+REVOKE ALL ON _cat_tools.pg_class_v FROM public;
+
 
 /*
  * Temporary stub function. We do this so we can use the nice create_function
@@ -717,15 +745,20 @@ GRANT SELECT ON cat_tools.pg_class_v TO cat_tools__usage;
 
 @generated@
 
+SELECT __cat_tools.exec(format($fmt$
 CREATE OR REPLACE VIEW _cat_tools.pg_attribute_v AS
-  SELECT a.*
+  SELECT %s
       , c.*
       , t.oid AS typoid
-      , t.*
+      , %s
     FROM pg_attribute a
       LEFT JOIN _cat_tools.pg_class_v c ON ( c.reloid = a.attrelid )
       LEFT JOIN pg_type t ON ( t.oid = a.atttypid )
 ;
+$fmt$
+  , __cat_tools.omit_column('pg_catalog.pg_attribute', array['attmissingval'])
+  , __cat_tools.omit_column('pg_catalog.pg_type')
+));
 REVOKE ALL ON _cat_tools.pg_attribute_v FROM public;
 
 CREATE OR REPLACE VIEW _cat_tools.column AS
@@ -756,8 +789,10 @@ REVOKE ALL ON _cat_tools.column FROM public;
 @generated@
 
 -- No perms on extension visibility
+SELECT __cat_tools.exec(format($fmt$
 CREATE OR REPLACE VIEW cat_tools.pg_extension_v AS
-  SELECT e.oid, e.*
+  SELECT e.oid
+      , %s
 
       , extnamespace::regnamespace AS extschema -- SED: REQUIRES 9.5!
       , nspname AS extschema -- SED: PRIOR TO 9.5!
@@ -766,6 +801,9 @@ CREATE OR REPLACE VIEW cat_tools.pg_extension_v AS
     FROM pg_catalog.pg_extension e
       LEFT JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace
 ;
+$fmt$
+  , __cat_tools.omit_column('pg_catalog.pg_extension')
+));
 GRANT SELECT ON cat_tools.pg_extension_v TO cat_tools__usage;
 
 CREATE OR REPLACE VIEW cat_tools.column AS
@@ -1318,7 +1356,11 @@ BEGIN
   RAISE DEBUG 'v_work "%"', v_work;
 
   -- Get function arguments
-  v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::pg_catalog.regproc || E'\\(';
+  IF current_setting('server_version')::real >= 11.0 THEN
+    v_execute_clause := ' EXECUTE FUNCTION ' || r_trigger.tgfoid::pg_catalog.regproc || E'\\(';
+  ELSE
+    v_execute_clause := ' EXECUTE PROCEDURE ' || r_trigger.tgfoid::pg_catalog.regproc || E'\\(';
+  END IF;
   v_array := regexp_split_to_array( v_work, v_execute_clause );
   EXECUTE format(
       'SELECT array[ %s ]'
@@ -1454,6 +1496,10 @@ CLUSTER _cat_tools.catalog_metadata USING catalog_metadata__pk_object_catalog;
 /*
  * Drop "temporary" objects
  */
+DROP FUNCTION __cat_tools.omit_column(
+  rel text
+  , omit name[] -- DEFAULT array['oid']
+);
 DROP FUNCTION __cat_tools.exec(
   sql text
 );

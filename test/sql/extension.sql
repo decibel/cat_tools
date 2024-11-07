@@ -32,7 +32,7 @@ SELECT isnt_empty(
 SELECT bag_eq(
   $$SELECT * FROM cat_tools.pg_extension__get('cat_tools')$$
   , format(
-    $$SELECT e.oid, e.*, %s, extconfig::regclass[] AS ext_config_table
+    $$SELECT e.*, %s, extconfig::regclass[] AS ext_config_table
       FROM pg_extension e
         JOIN pg_namespace n ON n.oid = extnamespace
       WHERE extname = 'cat_tools'

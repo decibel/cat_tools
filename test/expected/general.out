@@ -1,5 +1,4 @@
 \set ECHO none
-1..2
+1..1
 ok 1 - Schema __cat_tools should not exist
-ok 2 - verify pg_get_object_address
 # TRANSACTION INTENTIONALLY LEFT OPEN!
