@@ -41,6 +41,7 @@ SET LOCAL ROLE :use_role;
 
 \set call 'SELECT * FROM %I.%I( %L, %L )'
 \set n pg_attribute__get
+
 SELECT throws_ok(
   format(
     :'call', :'s', :'n'
@@ -62,13 +63,23 @@ SELECT throws_ok(
   , 'Non-existent column throws error'
 );
 
+/*
+ * pg_attributes.attmissingval is type anyarray, which doesn't have an equality
+ * operator. That breaks results_eq(), so we have to omit it from the column
+ * list.
+ */
+SELECT pg_temp.omit_column('pg_catalog.pg_attribute', array['attmissingval']) AS atts
+\gset
+\set get_attributes 'SELECT ' :atts ' FROM pg_attribute '
+\set call 'SELECT ' :atts ' FROM %I.%I( %L, %L )'
+
 SELECT results_eq(
   format(
     :'call', :'s', :'n'
     , 'pg_catalog.pg_class'
     , 'relname'
   )
-  , $$SELECT * FROM pg_attribute WHERE attrelid = 'pg_class'::regclass AND attname='relname'$$
+  , :'get_attributes' || $$WHERE attrelid = 'pg_class'::regclass AND attname='relname'$$
   , 'Verify details of pg_class.relname'
 );
 SELECT results_eq(
@@ -77,7 +88,7 @@ SELECT results_eq(
     , 'pg_catalog.pg_tables'
     , 'tablename'
   )
-  , $$SELECT * FROM pg_attribute WHERE attrelid = 'pg_tables'::regclass AND attname='tablename'$$
+  , :'get_attributes' || $$WHERE attrelid = 'pg_tables'::regclass AND attname='tablename'$$
   , 'Verify details of pg_tables.tablename'
 );
 
